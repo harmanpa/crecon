@@ -2,30 +2,46 @@
 
 recon_status recon_wall_open(FILE* fp, recon_wall* out) {
     recon_status status = RECON_OK;
-    uint32_t header_size;
+    uint32_t* header_size;
     char* header_data;
-    msgpack_unpacked header;
+    msgpack_unpacked* header;
     msgpack_object object;
+    int i;
+    msgpack_object_kv kv;
     if (fp == NULL) {
         return RECON_READ_ERROR;
     }
     *out = (recon_wall*) calloc(1, sizeof (wall_file));
     wall_file* wall = (wall_file*) * out;
     wall->fp = fp;
-    status = recon_wall_unpack_fixed_header(*wall, &header_size);
+    header_size = (uint32_t*) malloc(sizeof (uint32_t*));
+    status = recon_wall_unpack_fixed_header(wall, header_size);
     if (RECON_OK != status) {
         return status;
     }
-    if (header_size != fread(header_data, 1, header_size, wall->fp)) {
+    header_data = (char*) malloc(*header_size);
+    if (*header_size != fread(header_data, 1, *header_size, wall->fp)) {
         return RECON_READ_ERROR;
     }
-    if (!msgpack_unpack_next(&header, header_data, header_size, NULL)) {
-        return RECON_DESERIALIZATION_ERROR;
-    }
-    object = header.data;
+
+    header = (msgpack_unpacked*) malloc(sizeof (msgpack_unpacked*));
+    msgpack_unpacked_init(header);
+    msgpack_unpack_next(header, header_data, *header_size, NULL);
+
+    /*
+        if (!msgpack_unpack_next(header, header_data, *header_size, NULL)) {
+            return RECON_DESERIALIZATION_ERROR;
+        }
+     */
+    free(header_size);
+    free(header_data);
+    object = header->data;
     if (object.type != MSGPACK_OBJECT_MAP) {
         return RECON_DESERIALIZATION_ERROR;
     }
+    msgpack_unpacked_destroy(header);
+    free(header);
+    //TODO: Visit object
     return status;
 }
 
@@ -55,8 +71,14 @@ recon_status recon_wall_close(recon_wall wall) {
     if (0 != fclose(file->fp)) {
         return RECON_WRITE_ERROR;
     }
-    msgpack_packer_free(file->packer);
-    msgpack_sbuffer_free(file->buffer);
+    if (file->packer != NULL) {
+        msgpack_packer_free(file->packer);
+        file->packer = NULL;
+    }
+    if (file->buffer != NULL) {
+        msgpack_sbuffer_free(file->buffer);
+        file->buffer = NULL;
+    }
     free(wall);
     return RECON_OK;
 }
@@ -137,7 +159,9 @@ recon_status recon_wall_finalize(recon_wall wall) {
             }
         }
         // Objects
-
+        msgpack_pack_raw(file->packer, 4);
+        msgpack_pack_raw_body(file->packer, "objs", 4);
+        msgpack_pack_nil(file->packer);
 
         // Write fixed header
         size = file->buffer->size;
@@ -177,9 +201,7 @@ recon_status recon_wall_flush(recon_wall wall) {
 }
 
 recon_status recon_wall_unpack_fixed_header(wall_file* file, uint32_t* out) {
-    uint32_t header_size;
-    char* header = (char*) calloc(18, 1);
-    fread(header, 1, 18, file->fp);
+    char* header = (char*) malloc(18);
     if (18 != fread(header, 1, 18, file->fp)) {
         free(header);
         return RECON_READ_ERROR;
@@ -187,15 +209,15 @@ recon_status recon_wall_unpack_fixed_header(wall_file* file, uint32_t* out) {
     if (strncmp(header, "recon:wall:v01", 14) != 0) {
         return RECON_WRONG_FILE_TYPE;
     }
-    header_size = bytes_to_int(&(header[14]));
-    *out = header_size;
+    *out = bytes_to_int(header + 14);
+    free(header);
     return RECON_OK;
 }
 
 recon_status recon_wall_pack_fixed_header(wall_file* file, uint32_t header_size) {
     char* header = (char*) calloc(18, 1);
     memcpy(header, "recon:wall:v01", 14);
-    int_to_bytes(header_size, &(header[14]));
+    int_to_bytes(header_size, header + 14);
     if (0 != fseek(file->fp, 0, SEEK_SET)) {
         return RECON_WRITE_ERROR;
     }

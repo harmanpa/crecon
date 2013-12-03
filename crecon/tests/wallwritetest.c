@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "crecon.h"
+#include "crecon_impl.h"
 
 /*
  * Simple C Test Suite
@@ -22,9 +23,9 @@ void test1() {
     recon_wall wall;
     recon_wall wall2;
     recon_wall_table table;
-    int nsignals = 10;
-    int nrows = 100;
-    int nflush = 10;
+    int nsignals = 2;
+    int nrows = 10;
+    int nflush = 2;
     printf("wallwritetest test 1\n");
     FILE* f = fopen("test.wll", "w");
     status = recon_wall_create(f, 1, 0, &wall);
@@ -84,14 +85,39 @@ void test1() {
         return;
     }
 
-/*
     FILE* f2 = fopen("test.wll", "r");
+
     status = recon_wall_open(f2, &wall2);
     if (status != RECON_OK) {
-        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed open\n");
+        switch (status) {
+            case RECON_READ_ERROR:
+                printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed read\n");
+                return;
+            case RECON_DESERIALIZATION_ERROR:
+                printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed deser\n");
+                return;
+        }
+
+    }
+/*
+    status = recon_wall_close(wall2);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed close\n");
         return;
     }
 */
+
+}
+
+void test2() {
+    uint32_t i;
+    char* a = (char*) malloc(8);
+    int_to_bytes(22, a + 4);
+    i = bytes_to_int(a + 4);
+    if (i != 22) {
+        printf("%%TEST_FAILED%% time=0 testname=test2 (wallwritetest) message=Failed: %i\n", i);
+        return;
+    }
 }
 
 int main(int argc, char** argv) {
