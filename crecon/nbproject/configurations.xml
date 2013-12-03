@@ -4,9 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>bson.h</itemPath>
       <itemPath>crecon.h</itemPath>
-      <itemPath>encoding.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -15,14 +13,30 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>bson.c</itemPath>
       <itemPath>crecon.c</itemPath>
-      <itemPath>encoding.c</itemPath>
+      <itemPath>crecon_impl.h</itemPath>
+      <itemPath>crecon_meld.c</itemPath>
+      <itemPath>crecon_transform.c</itemPath>
+      <itemPath>crecon_util.c</itemPath>
+      <itemPath>crecon_wall.c</itemPath>
+      <itemPath>crecon_wall_table.c</itemPath>
+      <itemPath>crecon_wall_table_row.c</itemPath>
+      <itemPath>objectc.c</itemPath>
+      <itemPath>unpack.c</itemPath>
+      <itemPath>version.c</itemPath>
+      <itemPath>vrefbuffer.c</itemPath>
+      <itemPath>zone.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
                    projectFiles="false"
                    kind="TEST_LOGICAL_FOLDER">
+      <logicalFolder name="f1"
+                     displayName="Wall Write Test"
+                     projectFiles="true"
+                     kind="TEST">
+        <itemPath>tests/wallwritetest.c</itemPath>
+      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -40,25 +54,53 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
-        <cTool>
-          <preprocessorList>
-            <Elem>MONGO_HAVE_STDINT</Elem>
-          </preprocessorList>
-        </cTool>
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="bson.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="bson.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="crecon.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="crecon.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="encoding.c" ex="false" tool="0" flavor2="0">
+      <item path="crecon_impl.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="encoding.h" ex="false" tool="3" flavor2="0">
+      <item path="crecon_meld.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_transform.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_util.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_wall.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_wall_table.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_wall_table_row.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+        </linkerTool>
+      </folder>
+      <item path="objectc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="tests/wallwritetest.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="unpack.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="version.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="vrefbuffer.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="zone.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="3">
@@ -83,17 +125,50 @@
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="bson.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="bson.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="crecon.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="crecon.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="encoding.c" ex="false" tool="0" flavor2="0">
+      <item path="crecon_impl.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="encoding.h" ex="false" tool="3" flavor2="0">
+      <item path="crecon_meld.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_transform.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_util.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_wall.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_wall_table.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_wall_table_row.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+        </linkerTool>
+      </folder>
+      <item path="objectc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="tests/wallwritetest.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="unpack.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="version.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="vrefbuffer.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="zone.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
   </confs>

@@ -35,10 +35,25 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/bson.o \
 	${OBJECTDIR}/crecon.o \
-	${OBJECTDIR}/encoding.o
+	${OBJECTDIR}/crecon_meld.o \
+	${OBJECTDIR}/crecon_transform.o \
+	${OBJECTDIR}/crecon_util.o \
+	${OBJECTDIR}/crecon_wall.o \
+	${OBJECTDIR}/crecon_wall_table.o \
+	${OBJECTDIR}/crecon_wall_table_row.o \
+	${OBJECTDIR}/objectc.o \
+	${OBJECTDIR}/unpack.o \
+	${OBJECTDIR}/version.o \
+	${OBJECTDIR}/vrefbuffer.o \
+	${OBJECTDIR}/zone.o
 
+# Test Directory
+TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
+
+# Test Files
+TESTFILES= \
+	${TESTDIR}/TestFiles/f1
 
 # C Compiler Flags
 CFLAGS=
@@ -66,23 +81,246 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcrecon.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcrecon.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcrecon.a
 
-${OBJECTDIR}/bson.o: bson.c 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/bson.o bson.c
-
 ${OBJECTDIR}/crecon.o: crecon.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon.o crecon.c
 
-${OBJECTDIR}/encoding.o: encoding.c 
+${OBJECTDIR}/crecon_meld.o: crecon_meld.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/encoding.o encoding.c
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_meld.o crecon_meld.c
+
+${OBJECTDIR}/crecon_transform.o: crecon_transform.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_transform.o crecon_transform.c
+
+${OBJECTDIR}/crecon_util.o: crecon_util.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_util.o crecon_util.c
+
+${OBJECTDIR}/crecon_wall.o: crecon_wall.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_wall.o crecon_wall.c
+
+${OBJECTDIR}/crecon_wall_table.o: crecon_wall_table.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_wall_table.o crecon_wall_table.c
+
+${OBJECTDIR}/crecon_wall_table_row.o: crecon_wall_table_row.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_wall_table_row.o crecon_wall_table_row.c
+
+${OBJECTDIR}/objectc.o: objectc.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/objectc.o objectc.c
+
+${OBJECTDIR}/unpack.o: unpack.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/unpack.o unpack.c
+
+${OBJECTDIR}/version.o: version.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/version.o version.c
+
+${OBJECTDIR}/vrefbuffer.o: vrefbuffer.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/vrefbuffer.o vrefbuffer.c
+
+${OBJECTDIR}/zone.o: zone.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/zone.o zone.c
 
 # Subprojects
 .build-subprojects:
+
+# Build Test Targets
+.build-tests-conf: .build-conf ${TESTFILES}
+${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/wallwritetest.o ${OBJECTFILES:%.o=%_nomain.o}
+	${MKDIR} -p ${TESTDIR}/TestFiles
+	${LINK.c}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} 
+
+
+${TESTDIR}/tests/wallwritetest.o: tests/wallwritetest.c 
+	${MKDIR} -p ${TESTDIR}/tests
+	${RM} $@.d
+	$(COMPILE.c) -O2 -I. -MMD -MP -MF $@.d -o ${TESTDIR}/tests/wallwritetest.o tests/wallwritetest.c
+
+
+${OBJECTDIR}/crecon_nomain.o: ${OBJECTDIR}/crecon.o crecon.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/crecon.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_nomain.o crecon.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/crecon.o ${OBJECTDIR}/crecon_nomain.o;\
+	fi
+
+${OBJECTDIR}/crecon_meld_nomain.o: ${OBJECTDIR}/crecon_meld.o crecon_meld.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/crecon_meld.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_meld_nomain.o crecon_meld.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/crecon_meld.o ${OBJECTDIR}/crecon_meld_nomain.o;\
+	fi
+
+${OBJECTDIR}/crecon_transform_nomain.o: ${OBJECTDIR}/crecon_transform.o crecon_transform.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/crecon_transform.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_transform_nomain.o crecon_transform.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/crecon_transform.o ${OBJECTDIR}/crecon_transform_nomain.o;\
+	fi
+
+${OBJECTDIR}/crecon_util_nomain.o: ${OBJECTDIR}/crecon_util.o crecon_util.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/crecon_util.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_util_nomain.o crecon_util.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/crecon_util.o ${OBJECTDIR}/crecon_util_nomain.o;\
+	fi
+
+${OBJECTDIR}/crecon_wall_nomain.o: ${OBJECTDIR}/crecon_wall.o crecon_wall.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/crecon_wall.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_wall_nomain.o crecon_wall.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/crecon_wall.o ${OBJECTDIR}/crecon_wall_nomain.o;\
+	fi
+
+${OBJECTDIR}/crecon_wall_table_nomain.o: ${OBJECTDIR}/crecon_wall_table.o crecon_wall_table.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/crecon_wall_table.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_wall_table_nomain.o crecon_wall_table.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/crecon_wall_table.o ${OBJECTDIR}/crecon_wall_table_nomain.o;\
+	fi
+
+${OBJECTDIR}/crecon_wall_table_row_nomain.o: ${OBJECTDIR}/crecon_wall_table_row.o crecon_wall_table_row.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/crecon_wall_table_row.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_wall_table_row_nomain.o crecon_wall_table_row.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/crecon_wall_table_row.o ${OBJECTDIR}/crecon_wall_table_row_nomain.o;\
+	fi
+
+${OBJECTDIR}/objectc_nomain.o: ${OBJECTDIR}/objectc.o objectc.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/objectc.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/objectc_nomain.o objectc.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/objectc.o ${OBJECTDIR}/objectc_nomain.o;\
+	fi
+
+${OBJECTDIR}/unpack_nomain.o: ${OBJECTDIR}/unpack.o unpack.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/unpack.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/unpack_nomain.o unpack.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/unpack.o ${OBJECTDIR}/unpack_nomain.o;\
+	fi
+
+${OBJECTDIR}/version_nomain.o: ${OBJECTDIR}/version.o version.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/version.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/version_nomain.o version.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/version.o ${OBJECTDIR}/version_nomain.o;\
+	fi
+
+${OBJECTDIR}/vrefbuffer_nomain.o: ${OBJECTDIR}/vrefbuffer.o vrefbuffer.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/vrefbuffer.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/vrefbuffer_nomain.o vrefbuffer.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/vrefbuffer.o ${OBJECTDIR}/vrefbuffer_nomain.o;\
+	fi
+
+${OBJECTDIR}/zone_nomain.o: ${OBJECTDIR}/zone.o zone.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/zone.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -O2 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/zone_nomain.o zone.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/zone.o ${OBJECTDIR}/zone_nomain.o;\
+	fi
+
+# Run Test Targets
+.test-conf:
+	@if [ "${TEST}" = "" ]; \
+	then  \
+	    ${TESTDIR}/TestFiles/f1 || true; \
+	else  \
+	    ./${TEST} || true; \
+	fi
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
