@@ -1,7 +1,7 @@
 #include "crecon_impl.h"
 
 uint32_t bytes_to_int(char* bytes) {
-    return (((uint32_t) bytes[0]) << 24) + (((uint32_t) bytes[1]) << 16) + (((uint32_t) bytes[2]) << 8) + (uint32_t) bytes[3];
+    return (((uint32_t) bytes[3]) << 24) + (((uint32_t) bytes[2]) << 16) + (((uint32_t) bytes[1]) << 8) + (uint32_t) bytes[0];
 }
 
 void int_to_bytes(uint32_t i, char* bytes) {
