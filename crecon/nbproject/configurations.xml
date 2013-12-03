@@ -13,7 +13,6 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>crecon.c</itemPath>
       <itemPath>crecon_impl.h</itemPath>
       <itemPath>crecon_meld.c</itemPath>
       <itemPath>crecon_transform.c</itemPath>
@@ -57,8 +56,6 @@
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="crecon.c" ex="false" tool="0" flavor2="0">
-      </item>
       <item path="crecon.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="crecon_impl.h" ex="false" tool="3" flavor2="0">
@@ -125,8 +122,6 @@
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="crecon.c" ex="false" tool="0" flavor2="0">
-      </item>
       <item path="crecon.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="crecon_impl.h" ex="false" tool="3" flavor2="0">

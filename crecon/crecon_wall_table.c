@@ -18,12 +18,14 @@ recon_status recon_wall_add_table(recon_wall wall, const char* name, int nSignal
     }
     table = &(file->tables[file->ndefinedtables]);
     table->wall = wall;
-    table->name = (char*) calloc(strlen(name),1);
-    memcpy(table->name,name,strlen(name));
+    table->name = (char*) calloc(strlen(name), 1);
+    memcpy(table->name, name, strlen(name));
     table->nsignals = nSignals;
     table->signals = (char**) calloc(nSignals, sizeof (char*));
     table->naliases = nAliases;
-    table->aliases = (wall_table_alias*)calloc(nAliases, sizeof(wall_table_alias));
+    table->aliases = (char**) calloc(nAliases, sizeof (char*));
+    table->aliased = (char**) calloc(nAliases, sizeof (char*));
+    table->transforms = (char**) calloc(nAliases, sizeof (char*));
     table->ndefinedsignals = 0;
     file->ndefinedtables++;
     *out = table;
@@ -45,8 +47,8 @@ recon_status recon_wall_table_add_signal(recon_wall_table tab, const char* name)
         // Error
         return RECON_NAME_NOT_UNIQUE;
     }
-    table->signals[table->ndefinedsignals] = (char*) calloc(strlen(name),1);
-    memcpy(table->signals[table->ndefinedsignals],name,strlen(name));
+    table->signals[table->ndefinedsignals] = (char*) calloc(strlen(name), 1);
+    memcpy(table->signals[table->ndefinedsignals], name, strlen(name));
     table->ndefinedsignals++;
     return RECON_OK;
 }
@@ -65,15 +67,36 @@ recon_status recon_wall_table_find_signal(recon_wall_table tab, const char* name
 
 recon_status recon_wall_table_get_signal(recon_wall_table tab, int index, char** name) {
     wall_table* table = (wall_table*) tab;
-    if(index<0 || index>=table->ndefinedsignals) {
+    if (index < 0 || index >= table->ndefinedsignals) {
         return RECON_UNDEFINED;
     }
     *name = table->signals[index];
     return RECON_OK;
 }
 
-recon_status recon_wall_table_add_alias(recon_wall_table table, const char* signal, const char* alias, recon_transform transform) {
-
+recon_status recon_wall_table_add_alias(recon_wall_table tab, const char* alias, const char* signal, char* transform) {
+    int other;
+    wall_table* table = (wall_table*) tab;
+    if (table->ndefinedaliases >= table->naliases) {
+        // Error
+        return RECON_ALREADY_DEFINED;
+    }
+    /*
+        if (recon_wall_table_find_signal(table, name, &other) == RECON_OK) {
+            // Error
+            return RECON_NAME_NOT_UNIQUE;
+        }
+     */
+    table->aliases[table->ndefinedaliases] = (char*) calloc(strlen(alias), 1);
+    memcpy(table->aliases[table->ndefinedaliases], alias, strlen(alias));
+    table->aliased[table->ndefinedaliases] = (char*) calloc(strlen(signal), 1);
+    memcpy(table->aliased[table->ndefinedaliases], signal, strlen(signal));
+    if (transform) {
+        table->transforms[table->ndefinedaliases] = (char*) calloc(strlen(transform), 1);
+        memcpy(table->transforms[table->ndefinedaliases], transform, strlen(transform));
+    }
+    table->ndefinedaliases++;
+    return RECON_OK;
 }
 
 recon_status recon_wall_get_table(recon_wall wall, int n, recon_wall_table* out) {

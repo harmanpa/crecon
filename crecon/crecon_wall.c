@@ -52,7 +52,9 @@ recon_status recon_wall_create(FILE* fp, int nTables, int nObjects, recon_wall* 
 recon_status recon_wall_close(recon_wall wall) {
     wall_file* file = (wall_file*) wall;
     recon_wall_flush(wall);
-    fclose(file->fp);
+    if (0 != fclose(file->fp)) {
+        return RECON_WRITE_ERROR;
+    }
     msgpack_packer_free(file->packer);
     msgpack_sbuffer_free(file->buffer);
     free(wall);
@@ -68,10 +70,9 @@ recon_status recon_wall_finalize(recon_wall wall) {
     if (file->finalized) {
         return status;
     }
-    msgpack_pack_map(file->packer, 3);
-
     // Check all data is complete
     if (file->ntables == file->ndefinedtables && file->nobjects == file->ndefinedobjects) {
+        msgpack_pack_map(file->packer, 3);
         // Meta
         msgpack_pack_raw(file->packer, 5);
         msgpack_pack_raw_body(file->packer, "fmeta", 5);
@@ -93,23 +94,43 @@ recon_status recon_wall_finalize(recon_wall wall) {
                 msgpack_pack_raw(file->packer, strlen(table->name));
                 msgpack_pack_raw_body(file->packer, table->name, strlen(table->name));
                 msgpack_pack_map(file->packer, 4);
-                // tmeta
+                // Table Meta Data
                 msgpack_pack_raw(file->packer, 5);
                 msgpack_pack_raw_body(file->packer, "tmeta", 5);
                 msgpack_pack_nil(file->packer);
-                // sigs
+                // Signals
                 msgpack_pack_raw(file->packer, 4);
                 msgpack_pack_raw_body(file->packer, "sigs", 4);
-                msgpack_pack_array(file->packer, table->nsignals);
-                for (j = 0; j < table->nsignals; j++) {
-                    msgpack_pack_raw(file->packer, strlen(table->signals[j]));
-                    msgpack_pack_raw_body(file->packer, table->signals[j], strlen(table->signals[j]));
+                if (table->nsignals == 0) {
+                    msgpack_pack_nil(file->packer);
+                } else {
+                    msgpack_pack_array(file->packer, table->nsignals);
+                    for (j = 0; j < table->nsignals; j++) {
+                        msgpack_pack_raw(file->packer, strlen(table->signals[j]));
+                        msgpack_pack_raw_body(file->packer, table->signals[j], strlen(table->signals[j]));
+                    }
                 }
-                // als
+                // Aliases
                 msgpack_pack_raw(file->packer, 3);
                 msgpack_pack_raw_body(file->packer, "als", 3);
-                msgpack_pack_nil(file->packer);
-                // vmeta
+                if (table->naliases == 0) {
+                    msgpack_pack_nil(file->packer);
+                } else {
+                    msgpack_pack_map(file->packer, table->naliases);
+                    for (j = 0; j < table->naliases; j++) {
+                        msgpack_pack_raw(file->packer, strlen(table->aliases[j]));
+                        msgpack_pack_raw_body(file->packer, table->aliases[j], strlen(table->aliases[j]));
+                        msgpack_pack_map(file->packer, 2);
+                        msgpack_pack_raw(file->packer, 1);
+                        msgpack_pack_raw_body(file->packer, "s", 1);
+                        msgpack_pack_raw(file->packer, strlen(table->aliased[j]));
+                        msgpack_pack_raw_body(file->packer, table->aliased[j], strlen(table->aliased[j]));
+                        msgpack_pack_raw(file->packer, 1);
+                        msgpack_pack_raw_body(file->packer, "t", 1);
+                        msgpack_pack_nil(file->packer);
+                    }
+                }
+                // Variable Meta Data
                 msgpack_pack_raw(file->packer, 5);
                 msgpack_pack_raw_body(file->packer, "vmeta", 5);
                 msgpack_pack_nil(file->packer);

@@ -15,12 +15,6 @@ extern "C" {
 #define TRUE 1;
 
     typedef struct {
-        char* signal;
-        char* alias;
-        char* transform;
-    } wall_table_alias;
-
-    typedef struct {
         recon_wall wall;
         char* name;
         int nsignals;
@@ -28,7 +22,9 @@ extern "C" {
         int naliases;
         int ndefinedaliases;
         char** signals;
-        wall_table_alias* aliases;
+        char** aliases;
+        char** aliased;
+        char** transforms;
     } wall_table;
 
     typedef struct {
