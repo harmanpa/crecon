@@ -86,6 +86,16 @@ static inline int msgpack_sbuffer_write(void* data, const char* buf, unsigned in
 	return 0;
 }
 
+static inline int msgpack_sbuffer_insert(void* data, size_t position, const char* buf, unsigned int len)
+{
+	msgpack_sbuffer* sbuf = (msgpack_sbuffer*)data;
+        if(position + len > sbuf->size) {
+            return -1;
+        }
+        memcpy(sbuf->data + position, buf, len);
+	return 0;
+}
+
 static inline char* msgpack_sbuffer_release(msgpack_sbuffer* sbuf)
 {
 	char* tmp = sbuf->data;

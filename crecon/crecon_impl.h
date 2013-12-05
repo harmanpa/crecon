@@ -49,6 +49,7 @@ extern "C" {
         wall_table* currentrowtable;
         int currentrowtablesize;
         int currentrowwritten;
+        size_t positionatrowstart;
     } wall_file;
     
     /**

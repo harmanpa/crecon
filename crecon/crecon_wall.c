@@ -23,26 +23,71 @@ recon_status recon_wall_open(FILE* fp, recon_wall* out) {
     if (*header_size != fread(header_data, 1, *header_size, wall->fp)) {
         return RECON_READ_ERROR;
     }
-
     header = (msgpack_unpacked*) malloc(sizeof (msgpack_unpacked*));
     msgpack_unpacked_init(header);
     msgpack_unpack_next(header, header_data, *header_size, NULL);
-
-    /*
-        if (!msgpack_unpack_next(header, header_data, *header_size, NULL)) {
-            return RECON_DESERIALIZATION_ERROR;
-        }
-     */
     free(header_size);
     free(header_data);
     object = header->data;
     if (object.type != MSGPACK_OBJECT_MAP) {
         return RECON_DESERIALIZATION_ERROR;
     }
+    if (object.via.map.size != 0) {
+        msgpack_object_kv* p = object.via.map.ptr;
+        msgpack_object_print(stderr, p->key);
+        fprintf(stderr, "=>");
+        msgpack_object_print(stderr, p->val);
+        ++p;
+        msgpack_object_kv * const pend = object.via.map.ptr + object.via.map.size;
+        for (; p < pend; ++p) {
+            fprintf(stderr, ", ");
+            msgpack_object_print(stderr, p->key);
+            fprintf(stderr, "=>");
+            msgpack_object_print(stderr, p->val);
+        }
+    }
+
+
+
+    //for (i = 0; i < object.via.map.size; i++) {
+
+    /*
+            switch(object.via.map.ptr[i].key.type) {
+                case MSGPACK_OBJECT_RAW:
+                    break;
+                default:
+                    return RECON_DESERIALIZATION_ERROR;
+            }
+     */
+    //if (strcmp("tabs", object.via.map.ptr[i].key.via.raw.ptr)) {
+    /*status = recon_wall_visit_tables(wall, object.via.map.ptr[i].val.via.map);
+    if (RECON_OK != status) {
+        return status;
+    }*/
+    //}
+
+    //}
     msgpack_unpacked_destroy(header);
     free(header);
-    //TODO: Visit object
     return status;
+}
+
+recon_status recon_wall_visit_tables(wall_file* wall, msgpack_object_map map) {
+    int i;
+    recon_status status = RECON_OK;
+    wall->ntables = map.size;
+    wall->tables = (wall_table*) calloc(map.size, sizeof (wall_table*));
+    for (i = 0; i < map.size; i++) {
+        status = recon_wall_visit_table(wall, map.ptr[i].key.via.raw.ptr, map.ptr[i].val.via.map);
+        if (RECON_OK != status) {
+            return status;
+        }
+    }
+    return status;
+}
+
+recon_status recon_wall_visit_table(wall_file* wall, char* name, msgpack_object_map map) {
+    return RECON_OK;
 }
 
 recon_status recon_wall_create(FILE* fp, int nTables, int nObjects, recon_wall* out) {
@@ -119,49 +164,44 @@ recon_status recon_wall_finalize(recon_wall wall) {
                 // Table Meta Data
                 msgpack_pack_raw(file->packer, 5);
                 msgpack_pack_raw_body(file->packer, "tmeta", 5);
-                msgpack_pack_nil(file->packer);
+                msgpack_pack_map(file->packer, 0);
                 // Signals
                 msgpack_pack_raw(file->packer, 4);
                 msgpack_pack_raw_body(file->packer, "sigs", 4);
-                if (table->nsignals == 0) {
-                    msgpack_pack_nil(file->packer);
-                } else {
-                    msgpack_pack_array(file->packer, table->nsignals);
-                    for (j = 0; j < table->nsignals; j++) {
-                        msgpack_pack_raw(file->packer, strlen(table->signals[j]));
-                        msgpack_pack_raw_body(file->packer, table->signals[j], strlen(table->signals[j]));
-                    }
+                msgpack_pack_array(file->packer, table->nsignals);
+                for (j = 0; j < table->nsignals; j++) {
+                    msgpack_pack_raw(file->packer, strlen(table->signals[j]));
+                    msgpack_pack_raw_body(file->packer, table->signals[j], strlen(table->signals[j]));
                 }
                 // Aliases
                 msgpack_pack_raw(file->packer, 3);
                 msgpack_pack_raw_body(file->packer, "als", 3);
-                if (table->naliases == 0) {
-                    msgpack_pack_nil(file->packer);
-                } else {
-                    msgpack_pack_map(file->packer, table->naliases);
-                    for (j = 0; j < table->naliases; j++) {
-                        msgpack_pack_raw(file->packer, strlen(table->aliases[j]));
-                        msgpack_pack_raw_body(file->packer, table->aliases[j], strlen(table->aliases[j]));
-                        msgpack_pack_map(file->packer, 2);
-                        msgpack_pack_raw(file->packer, 1);
-                        msgpack_pack_raw_body(file->packer, "s", 1);
-                        msgpack_pack_raw(file->packer, strlen(table->aliased[j]));
-                        msgpack_pack_raw_body(file->packer, table->aliased[j], strlen(table->aliased[j]));
+                msgpack_pack_map(file->packer, table->naliases);
+                for (j = 0; j < table->naliases; j++) {
+                    msgpack_pack_raw(file->packer, strlen(table->aliases[j]));
+                    msgpack_pack_raw_body(file->packer, table->aliases[j], strlen(table->aliases[j]));
+                    msgpack_pack_map(file->packer, table->transforms[j] == NULL ? 1 : 2);
+                    msgpack_pack_raw(file->packer, 1);
+                    msgpack_pack_raw_body(file->packer, "s", 1);
+                    msgpack_pack_raw(file->packer, strlen(table->aliased[j]));
+                    msgpack_pack_raw_body(file->packer, table->aliased[j], strlen(table->aliased[j]));
+                    if (table->transforms[j] != NULL) {
                         msgpack_pack_raw(file->packer, 1);
                         msgpack_pack_raw_body(file->packer, "t", 1);
-                        msgpack_pack_nil(file->packer);
+                        msgpack_pack_raw(file->packer, strlen(table->transforms[j]));
+                        msgpack_pack_raw(file->packer, table->transforms[j], strlen(table->transforms[j]));
                     }
                 }
                 // Variable Meta Data
                 msgpack_pack_raw(file->packer, 5);
                 msgpack_pack_raw_body(file->packer, "vmeta", 5);
-                msgpack_pack_nil(file->packer);
+                msgpack_pack_map(file->packer, 0);
             }
         }
         // Objects
         msgpack_pack_raw(file->packer, 4);
         msgpack_pack_raw_body(file->packer, "objs", 4);
-        msgpack_pack_nil(file->packer);
+        msgpack_pack_map(file->packer, 0);
 
         // Write fixed header
         size = file->buffer->size;
