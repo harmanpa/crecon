@@ -23,9 +23,9 @@ void test1() {
     recon_wall wall;
     recon_wall wall2;
     recon_wall_table table;
-    int nsignals = 2;
-    int nrows = 10;
-    int nflush = 2;
+    int nsignals = 100;
+    int nrows = 100000;
+    int nflush = 100;
     printf("wallwritetest test 1\n");
     FILE* f = fopen("test.wll", "w");
     status = recon_wall_create(f, 1, 0, &wall);
@@ -84,7 +84,7 @@ void test1() {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed close\n");
         return;
     }
-
+/*
     FILE* f2 = fopen("test.wll", "r");
 
     status = recon_wall_open(f2, &wall2);

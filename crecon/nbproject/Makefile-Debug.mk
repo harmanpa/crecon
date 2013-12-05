@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/crecon_transform.o \
 	${OBJECTDIR}/crecon_util.o \
 	${OBJECTDIR}/crecon_wall.o \
+	${OBJECTDIR}/crecon_wall_object.o \
 	${OBJECTDIR}/crecon_wall_table.o \
 	${OBJECTDIR}/crecon_wall_table_row.o \
 	${OBJECTDIR}/objectc.o \
@@ -99,6 +100,11 @@ ${OBJECTDIR}/crecon_wall.o: crecon_wall.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_wall.o crecon_wall.c
+
+${OBJECTDIR}/crecon_wall_object.o: crecon_wall_object.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_wall_object.o crecon_wall_object.c
 
 ${OBJECTDIR}/crecon_wall_table.o: crecon_wall_table.c 
 	${MKDIR} -p ${OBJECTDIR}
@@ -201,6 +207,19 @@ ${OBJECTDIR}/crecon_wall_nomain.o: ${OBJECTDIR}/crecon_wall.o crecon_wall.c
 	    $(COMPILE.c) -g -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_wall_nomain.o crecon_wall.c;\
 	else  \
 	    ${CP} ${OBJECTDIR}/crecon_wall.o ${OBJECTDIR}/crecon_wall_nomain.o;\
+	fi
+
+${OBJECTDIR}/crecon_wall_object_nomain.o: ${OBJECTDIR}/crecon_wall_object.o crecon_wall_object.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/crecon_wall_object.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.c) -g -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_wall_object_nomain.o crecon_wall_object.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/crecon_wall_object.o ${OBJECTDIR}/crecon_wall_object_nomain.o;\
 	fi
 
 ${OBJECTDIR}/crecon_wall_table_nomain.o: ${OBJECTDIR}/crecon_wall_table.o crecon_wall_table.c 

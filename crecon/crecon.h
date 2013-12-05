@@ -24,6 +24,7 @@ extern "C" {
     typedef void* recon_wall;
     typedef void* recon_wall_table;
     typedef void* recon_wall_object;
+    typedef void* recon_wall_signal_pointer;
 
     /**
      * Open an existing Wall file
@@ -82,19 +83,76 @@ extern "C" {
      * @return Status
      */
     recon_status recon_wall_add_table(recon_wall, const char*, int, int, recon_wall_table*);
+    
+    /**
+     * Get the number of tables in the Wall file
+     * @param The Wall object
+     * @param Pointer to number of tables
+     * @return Status
+     */
+    recon_status recon_wall_n_tables(recon_wall,int*);
+    
+    /**
+     * Fetch a table by index
+     * @param The Wall object
+     * @param Table index
+     * @param Pointer to returned table
+     * @return Status
+     */
+    recon_status recon_wall_get_table(recon_wall, int, recon_wall_table*);
+    
+    /**
+     * Find a table by name
+     * @param The Wall object
+     * @param Table name
+     * @param Pointer to returned table
+     * @return Status
+     */
+    recon_status recon_wall_find_table(recon_wall, const char*, recon_wall_table*);
 
     /**
-     * 
+     * Add a signal to the table
      * @param 
      * @param 
      * @return 
      */
     recon_status recon_wall_table_add_signal(recon_wall_table, const char*);
+    
+    /**
+     * 
+     * @param 
+     * @param 
+     * @param 
+     * @param 
+     * @return 
+     */
     recon_status recon_wall_table_add_alias(recon_wall_table, const char*, const char*, char*);
-    recon_status recon_wall_get_table(recon_wall, int, recon_wall_table*);
-    recon_status recon_wall_find_table(recon_wall, const char*, recon_wall_table*);
+
+    /**
+     * 
+     * @param 
+     * @param 
+     * @param 
+     * @return 
+     */
     recon_status recon_wall_table_find_signal(recon_wall_table, const char*, int*);
+    
+    /**
+     * 
+     * @param 
+     * @param 
+     * @param 
+     * @return 
+     */
     recon_status recon_wall_table_get_signal(recon_wall_table, int, char**);
+    
+    /**
+     * 
+     * @param 
+     * @param 
+     * @param 
+     * @return 
+     */
     recon_status recon_wall_table_n_signals(recon_wall_table, int*, int*);
 
     // ROW FUNCTIONS
@@ -142,7 +200,19 @@ extern "C" {
      * @return 
      */
     recon_status recon_wall_add_object(recon_wall, const char*, recon_wall_object*);
-
+    /**
+     * 
+     * @param 
+     * @param 
+     * @return 
+     */
+    recon_status recon_wall_n_objects(recon_wall,int*);
+    recon_status recon_wall_get_object(recon_wall,int,recon_wall_object*);
+    recon_status recon_wall_find_object(recon_wall,const char*,recon_wall_object*);
+    
+    recon_status recon_wall_object_add_field_string(recon_wall_object, const char*);
+    recon_status recon_wall_object_add_field_double(recon_wall_object, double);
+    recon_status recon_wall_object_add_field_int(recon_wall_object, int);
 
     // TRANSFORMATIONS
 
