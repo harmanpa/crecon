@@ -33,7 +33,6 @@ recon_status recon_wall_add_table(recon_wall wall, const char* name, int nSignal
 }
 
 recon_status recon_wall_n_tables(recon_wall wall, int* n) {
-    wall_table* table;
     wall_file* file = (wall_file*) wall;
     *n = file->ntables;
     return RECON_OK;

@@ -28,6 +28,7 @@ extern "C" {
     } wall_table;
 
     typedef struct {
+        recon_wall wall;
         char* name;
     } wall_object;
 
