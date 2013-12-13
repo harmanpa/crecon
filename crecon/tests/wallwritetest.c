@@ -84,7 +84,7 @@ void test1() {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed close\n");
         return;
     }
-/*
+
     FILE* f2 = fopen("test.wll", "r");
 
     status = recon_wall_open(f2, &wall2);
@@ -112,8 +112,8 @@ void test1() {
 void test2() {
     uint32_t i;
     char* a = (char*) malloc(8);
-    int_to_bytes(22, a + 4);
-    i = bytes_to_int(a + 4);
+    recon_util_int_to_bytes(22, a + 4);
+    i = recon_util_bytes_to_int(a + 4);
     if (i != 22) {
         printf("%%TEST_FAILED%% time=0 testname=test2 (wallwritetest) message=Failed: %i\n", i);
         return;

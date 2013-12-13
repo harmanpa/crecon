@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -25,6 +26,7 @@ extern "C" {
         char** aliases;
         char** aliased;
         char** transforms;
+        int nrows;
     } wall_table;
 
     typedef struct {
@@ -35,6 +37,7 @@ extern "C" {
     typedef struct {
         FILE* fp;
         booleantype finalized;
+        int byteswritten;
         int nfmeta;
         //wall_fmeta *fmeta;
         int ntables;
@@ -58,14 +61,14 @@ extern "C" {
      * @param 
      * @return 
      */
-    uint32_t bytes_to_int(char*);
+    uint32_t recon_util_bytes_to_int(char*);
     
     /**
      * 
      * @param 
      * @param 
      */
-    void int_to_bytes(uint32_t, char*);
+    void recon_util_int_to_bytes(uint32_t, char*);
 #ifdef	__cplusplus
 }
 #endif

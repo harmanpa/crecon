@@ -9,12 +9,10 @@
         <group>
             <file>file:/Users/pete/Development/crecon/crecon/crecon_wall.c</file>
             <file>file:/Users/pete/Development/crecon/crecon/crecon_wall_table_row.c</file>
-            <file>file:/Users/pete/Development/crecon/crecon/crecon.h</file>
-            <file>file:/Users/pete/Development/crecon/crecon/unpack.c</file>
             <file>file:/Users/pete/Development/crecon/crecon/crecon_util.c</file>
+            <file>file:/Users/pete/Development/crecon/crecon/msgpack/sbuffer.h</file>
             <file>file:/Users/pete/Development/crecon/crecon/tests/wallwritetest.c</file>
-            <file>file:/Users/pete/Development/crecon/crecon/crecon_meld.c</file>
-            <file>file:/Users/pete/Development/crecon/crecon/crecon.c</file>
+            <file>file:/Users/pete/Development/crecon/crecon/crecon_impl.h</file>
         </group>
     </open-files>
 </project-private>

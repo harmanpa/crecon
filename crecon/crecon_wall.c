@@ -34,16 +34,11 @@ recon_status recon_wall_open(FILE* fp, recon_wall* out) {
     }
     if (object.via.map.size != 0) {
         msgpack_object_kv* p = object.via.map.ptr;
-        msgpack_object_print(stderr, p->key);
-        fprintf(stderr, "=>");
-        msgpack_object_print(stderr, p->val);
+        recon_wall_visit_keyvalue(wall, p->key, p->val);
         ++p;
         msgpack_object_kv * const pend = object.via.map.ptr + object.via.map.size;
         for (; p < pend; ++p) {
-            fprintf(stderr, ", ");
-            msgpack_object_print(stderr, p->key);
-            fprintf(stderr, "=>");
-            msgpack_object_print(stderr, p->val);
+            recon_wall_visit_keyvalue(wall, p->key, p->val);
         }
     }
 
@@ -72,13 +67,33 @@ recon_status recon_wall_open(FILE* fp, recon_wall* out) {
     return status;
 }
 
+recon_status recon_wall_visit_keyvalue(wall_file* wall, msgpack_object key, msgpack_object value) {
+    if(memcmp(key.via.raw.ptr, "fmeta", key.via.raw.size)==0) {
+        return recon_wall_visit_fmeta(wall, value.via.map);
+    }
+    if(memcmp(key.via.raw.ptr, "tabs", key.via.raw.size)==0) {
+        return recon_wall_visit_tables(wall, value.via.map);
+    }
+    if(memcmp(key.via.raw.ptr, "objs", key.via.raw.size)==0) {
+        return recon_wall_visit_objs(wall, value.via.map);
+    }
+}
+
+recon_status recon_wall_visit_fmeta(wall_file* wall, msgpack_object_map map) {
+    return RECON_OK;
+}
+
+recon_status recon_wall_visit_objs(wall_file* wall, msgpack_object_map map) {
+    return RECON_OK;
+}
+
 recon_status recon_wall_visit_tables(wall_file* wall, msgpack_object_map map) {
     int i;
     recon_status status = RECON_OK;
     wall->ntables = map.size;
     wall->tables = (wall_table*) calloc(map.size, sizeof (wall_table*));
     for (i = 0; i < map.size; i++) {
-        status = recon_wall_visit_table(wall, map.ptr[i].key.via.raw.ptr, map.ptr[i].val.via.map);
+        status = recon_wall_visit_table(wall, map.ptr[i].key.via.raw.ptr, map.ptr[i].key.via.raw.size, map.ptr[i].val.via.map);
         if (RECON_OK != status) {
             return status;
         }
@@ -86,8 +101,13 @@ recon_status recon_wall_visit_tables(wall_file* wall, msgpack_object_map map) {
     return status;
 }
 
-recon_status recon_wall_visit_table(wall_file* wall, char* name, msgpack_object_map map) {
-    return RECON_OK;
+recon_status recon_wall_visit_table(wall_file* wall, char* name, uint32_t namesize, msgpack_object_map map) {
+    recon_status status = RECON_OK;
+    recon_wall_table table;
+    char* tablename = (char*)malloc(namesize);
+    memcpy(name, tablename, namesize);
+    status = recon_wall_add_table((recon_wall)wall, tablename, 0, 0, &table);
+    return status;
 }
 
 recon_status recon_wall_create(FILE* fp, int nTables, int nObjects, recon_wall* out) {
@@ -189,7 +209,7 @@ recon_status recon_wall_finalize(recon_wall wall) {
                         msgpack_pack_raw(file->packer, 1);
                         msgpack_pack_raw_body(file->packer, "t", 1);
                         msgpack_pack_raw(file->packer, strlen(table->transforms[j]));
-                        msgpack_pack_raw(file->packer, table->transforms[j], strlen(table->transforms[j]));
+                        msgpack_pack_raw_body(file->packer, table->transforms[j], strlen(table->transforms[j]));
                     }
                 }
                 // Variable Meta Data
@@ -249,7 +269,7 @@ recon_status recon_wall_unpack_fixed_header(wall_file* file, uint32_t* out) {
     if (strncmp(header, "recon:wall:v01", 14) != 0) {
         return RECON_WRONG_FILE_TYPE;
     }
-    *out = bytes_to_int(header + 14);
+    *out = recon_util_bytes_to_int(header + 14);
     free(header);
     return RECON_OK;
 }
@@ -257,7 +277,7 @@ recon_status recon_wall_unpack_fixed_header(wall_file* file, uint32_t* out) {
 recon_status recon_wall_pack_fixed_header(wall_file* file, uint32_t header_size) {
     char* header = (char*) calloc(18, 1);
     memcpy(header, "recon:wall:v01", 14);
-    int_to_bytes(header_size, header + 14);
+    recon_util_int_to_bytes(header_size, header + 14);
     if (0 != fseek(file->fp, 0, SEEK_SET)) {
         return RECON_WRITE_ERROR;
     }
