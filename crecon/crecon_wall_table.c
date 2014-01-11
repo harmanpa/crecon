@@ -18,14 +18,14 @@ recon_status recon_wall_add_table(recon_wall wall, const char* name, int nSignal
     }
     table = &(file->tables[file->ndefinedtables]);
     table->wall = wall;
-    table->name = (char*) calloc(strlen(name), 1);
+    table->name = (char*) malloc(strlen(name));
     memcpy(table->name, name, strlen(name));
     table->nsignals = nSignals;
-    table->signals = (char**) calloc(nSignals, sizeof (char*));
+    table->signals = (char**) malloc(nSignals * sizeof (char*));
     table->naliases = nAliases;
-    table->aliases = (char**) calloc(nAliases, sizeof (char*));
-    table->aliased = (char**) calloc(nAliases, sizeof (char*));
-    table->transforms = (char**) calloc(nAliases, sizeof (char*));
+    table->aliases = (char**) malloc(nAliases * sizeof (char*));
+    table->aliased = (char**) malloc(nAliases * sizeof (char*));
+    table->transforms = (char**) malloc(nAliases * sizeof (char*));
     table->ndefinedsignals = 0;
     file->ndefinedtables++;
     *out = table;
@@ -53,7 +53,7 @@ recon_status recon_wall_table_add_signal(recon_wall_table tab, const char* name)
         // Error
         return RECON_NAME_NOT_UNIQUE;
     }
-    table->signals[table->ndefinedsignals] = (char*) calloc(strlen(name), 1);
+    table->signals[table->ndefinedsignals] = (char*) malloc(strlen(name));
     memcpy(table->signals[table->ndefinedsignals], name, strlen(name));
     table->ndefinedsignals++;
     return RECON_OK;
@@ -93,12 +93,12 @@ recon_status recon_wall_table_add_alias(recon_wall_table tab, const char* alias,
             return RECON_NAME_NOT_UNIQUE;
         }
      */
-    table->aliases[table->ndefinedaliases] = (char*) calloc(strlen(alias), 1);
+    table->aliases[table->ndefinedaliases] = (char*) malloc(strlen(alias));
     memcpy(table->aliases[table->ndefinedaliases], alias, strlen(alias));
-    table->aliased[table->ndefinedaliases] = (char*) calloc(strlen(signal), 1);
+    table->aliased[table->ndefinedaliases] = (char*) malloc(strlen(signal));
     memcpy(table->aliased[table->ndefinedaliases], signal, strlen(signal));
     if (transform) {
-        table->transforms[table->ndefinedaliases] = (char*) calloc(strlen(transform), 1);
+        table->transforms[table->ndefinedaliases] = (char*) malloc(strlen(transform));
         memcpy(table->transforms[table->ndefinedaliases], transform, strlen(transform));
     }
     table->ndefinedaliases++;

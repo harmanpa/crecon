@@ -14,7 +14,7 @@ recon_status recon_wall_add_object(recon_wall wall, const char* name, recon_wall
     }
     object = &(file->objects[file->ndefinedobjects]);
     object->wall = wall;
-    object->name = (char*) calloc(strlen(name), 1);
+    object->name = (char*) malloc(strlen(name));
     memcpy(object->name, name, strlen(name));
     *out = object;
     return RECON_OK;

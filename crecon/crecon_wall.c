@@ -6,12 +6,10 @@ recon_status recon_wall_open(FILE* fp, recon_wall* out) {
     char* header_data;
     msgpack_unpacked* header;
     msgpack_object object;
-    int i;
-    msgpack_object_kv kv;
     if (fp == NULL) {
         return RECON_READ_ERROR;
     }
-    *out = (recon_wall*) calloc(1, sizeof (wall_file));
+    *out = (recon_wall*) malloc(sizeof (wall_file));
     wall_file* wall = (wall_file*) * out;
     wall->fp = fp;
     header_size = (uint32_t*) malloc(sizeof (uint32_t*));
@@ -41,29 +39,10 @@ recon_status recon_wall_open(FILE* fp, recon_wall* out) {
             recon_wall_visit_keyvalue(wall, p->key, p->val);
         }
     }
-
-
-
-    //for (i = 0; i < object.via.map.size; i++) {
-
-    /*
-            switch(object.via.map.ptr[i].key.type) {
-                case MSGPACK_OBJECT_RAW:
-                    break;
-                default:
-                    return RECON_DESERIALIZATION_ERROR;
-            }
-     */
-    //if (strcmp("tabs", object.via.map.ptr[i].key.via.raw.ptr)) {
-    /*status = recon_wall_visit_tables(wall, object.via.map.ptr[i].val.via.map);
-    if (RECON_OK != status) {
-        return status;
-    }*/
-    //}
-
-    //}
     msgpack_unpacked_destroy(header);
     free(header);
+    wall->finalized = TRUE;
+    //todo: visit rows?
     return status;
 }
 
@@ -91,7 +70,7 @@ recon_status recon_wall_visit_tables(wall_file* wall, msgpack_object_map map) {
     int i;
     recon_status status = RECON_OK;
     wall->ntables = map.size;
-    wall->tables = (wall_table*) calloc(map.size, sizeof (wall_table*));
+    wall->tables = (wall_table*) malloc(map.size * sizeof (wall_table*));
     for (i = 0; i < map.size; i++) {
         status = recon_wall_visit_table(wall, map.ptr[i].key.via.raw.ptr, map.ptr[i].key.via.raw.size, map.ptr[i].val.via.map);
         if (RECON_OK != status) {
@@ -111,17 +90,17 @@ recon_status recon_wall_visit_table(wall_file* wall, char* name, uint32_t namesi
 }
 
 recon_status recon_wall_create(FILE* fp, int nTables, int nObjects, recon_wall* out) {
-    *out = (recon_wall*) calloc(1, sizeof (wall_file));
+    *out = (recon_wall*) malloc(sizeof (wall_file));
     wall_file* wall = (wall_file*) * out;
     wall->fp = fp;
     wall->nfmeta = 0;
     wall->ntables = nTables;
     wall->nobjects = nObjects;
     if (nTables > 0) {
-        wall->tables = (wall_table*) calloc(nTables, sizeof (wall_table));
+        wall->tables = (wall_table*) malloc(nTables * sizeof (wall_table));
     }
     if (nObjects > 0) {
-        wall->objects = (wall_object*) calloc(nObjects, sizeof (wall_object));
+        wall->objects = (wall_object*) malloc(nObjects * sizeof (wall_object));
     }
     wall->ndefinedtables = 0;
     wall->ndefinedobjects = 0;
@@ -275,7 +254,7 @@ recon_status recon_wall_unpack_fixed_header(wall_file* file, uint32_t* out) {
 }
 
 recon_status recon_wall_pack_fixed_header(wall_file* file, uint32_t header_size) {
-    char* header = (char*) calloc(18, 1);
+    char* header = (char*) malloc(18);
     memcpy(header, "recon:wall:v01", 14);
     recon_util_int_to_bytes(header_size, header + 14);
     if (0 != fseek(file->fp, 0, SEEK_SET)) {
