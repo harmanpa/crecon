@@ -84,7 +84,7 @@ recon_status recon_wall_visit_table(wall_file* wall, char* name, uint32_t namesi
     recon_status status = RECON_OK;
     recon_wall_table table;
     char* tablename = (char*)malloc(namesize);
-    memcpy(name, tablename, namesize);
+    memcpy(tablename, name, namesize);
     status = recon_wall_add_table((recon_wall)wall, tablename, 0, 0, &table);
     return status;
 }
