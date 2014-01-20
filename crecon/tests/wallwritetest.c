@@ -129,15 +129,15 @@ int main(int argc, char** argv) {
     time(&t0);
     test1();
     time(&t1);
-    printf("%%TEST_FINISHED%% time=%i test1 (wallwritetest) \n", t1 - t0);
+    printf("%%TEST_FINISHED%% time=%d test1 (wallwritetest) \n", (int)(t1 - t0));
 
-    printf("%%SUITE_FINISHED%% time=%i\n", t1 - t0);
+    printf("%%SUITE_FINISHED%% time=%d\n", (int)(t1 - t0));
 
     return (EXIT_SUCCESS);
 }
 
 int digits(int n) {
-    int count = 0;
+    int count = 1;
     while (n != 0) {
         n /= 10;
         ++count;
