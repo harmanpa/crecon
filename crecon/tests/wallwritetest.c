@@ -23,6 +23,7 @@ void test1() {
     recon_wall wall;
     recon_wall wall2;
     recon_wall_table table;
+    recon_wall_table table2;
     int nsignals = 100;
     int nrows = 100000;
     int nflush = 100;
@@ -99,6 +100,13 @@ void test1() {
         }
 
     }
+    /*
+    status = recon_wall_find_table(wall2, "myTable", &table2);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed finding table\n");
+        return;
+    }
+    
 /*
     status = recon_wall_close(wall2);
     if (status != RECON_OK) {
