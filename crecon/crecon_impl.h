@@ -11,9 +11,9 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-    typedef unsigned char booleantype;
-#define FALSE 0;
-#define TRUE 1;
+    typedef unsigned char recon_booleantype;
+#define RECON_FALSE 0;
+#define RECON_TRUE 1;
 
     typedef struct {
         recon_wall wall;
@@ -36,7 +36,7 @@ extern "C" {
 
     typedef struct {
         FILE* fp;
-        booleantype finalized;
+        recon_booleantype finalized;
         int byteswritten;
         int nfmeta;
         //wall_fmeta *fmeta;

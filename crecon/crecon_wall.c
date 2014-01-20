@@ -41,7 +41,7 @@ recon_status recon_wall_open(FILE* fp, recon_wall* out) {
     }
     msgpack_unpacked_destroy(header);
     free(header);
-    wall->finalized = TRUE;
+    wall->finalized = RECON_TRUE;
     //todo: visit rows?
     return status;
 }
@@ -215,7 +215,7 @@ recon_status recon_wall_finalize(recon_wall wall) {
                 return RECON_WRITE_ERROR;
             }
         }
-        file->finalized = TRUE;
+        file->finalized = RECON_TRUE;
         return RECON_OK;
     }
     return RECON_NOT_FULLY_DEFINED;
