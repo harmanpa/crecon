@@ -32,7 +32,7 @@ extern "C" {
      * @param Pointer to Wall object
      * @return Status
      */
-    recon_status recon_wall_open(FILE*, recon_wall*);
+    recon_status recon_wall_open(char*, recon_wall*);
     
     /**
      * Create a new Wall file
@@ -42,7 +42,7 @@ extern "C" {
      * @param Pointer to Wall object
      * @return Status
      */
-    recon_status recon_wall_create(FILE*, int, int, recon_wall*);
+    recon_status recon_wall_create(char*, int, int, recon_wall*);
     
     /**
      * Close a Wall file
@@ -144,8 +144,15 @@ extern "C" {
      * @param 
      * @return 
      */
+    recon_status recon_wall_table_get_alias(recon_wall_table, int, char**);
+    /**
+     * 
+     * @param 
+     * @param 
+     * @param 
+     * @return 
+     */
     recon_status recon_wall_table_get_signal(recon_wall_table, int, char**);
-    
     /**
      * 
      * @param 
@@ -189,7 +196,7 @@ extern "C" {
      * @param The table to be written to
      */
     recon_status recon_wall_table_end_row(recon_wall_table);
-
+    
     // OBJECT FUNCTIONS
 
     /**

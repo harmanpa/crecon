@@ -28,8 +28,7 @@ void test1() {
     int nrows = 100000;
     int nflush = 100;
     printf("wallwritetest test 1\n");
-    FILE* f = fopen("test.wll", "w");
-    status = recon_wall_create(f, 1, 0, &wall);
+    status = recon_wall_create("test.wll", 1, 0, &wall);
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed creating file\n");
         return;
@@ -40,7 +39,7 @@ void test1() {
         return;
     }
     for (i = 0; i < nsignals; i++) {
-        signalname = (char*) calloc(8 + digits(i), 1);
+        signalname = (char*) calloc(9 + digits(i), 1);
         sprintf(signalname, "%s%i", "variable", i);
         status = recon_wall_table_add_signal(table, signalname);
         if (status != RECON_OK) {
@@ -86,9 +85,7 @@ void test1() {
         return;
     }
 
-    FILE* f2 = fopen("test.wll", "r");
-
-    status = recon_wall_open(f2, &wall2);
+    status = recon_wall_open("test.wll", &wall2);
     if (status != RECON_OK) {
         switch (status) {
             case RECON_READ_ERROR:
@@ -100,21 +97,18 @@ void test1() {
         }
 
     }
-    /*
+    
     status = recon_wall_find_table(wall2, "myTable", &table2);
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed finding table\n");
         return;
     }
-    
-/*
+  
     status = recon_wall_close(wall2);
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed close\n");
         return;
     }
-*/
-
 }
 
 void test2() {
