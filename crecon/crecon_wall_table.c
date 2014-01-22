@@ -27,6 +27,7 @@ recon_status recon_wall_add_table(recon_wall wall, const char* name, int nSignal
     table->aliased = (char**) malloc(nAliases * sizeof (char*));
     table->transforms = (char**) malloc(nAliases * sizeof (char*));
     table->ndefinedsignals = 0;
+    table->ndefinedaliases = 0;
     file->ndefinedtables++;
     *out = table;
     return RECON_OK;
@@ -84,7 +85,8 @@ recon_status recon_wall_table_get_signal(recon_wall_table tab, int index, char**
     if (index < 0 || index >= table->ndefinedsignals) {
         return RECON_UNDEFINED;
     }
-    *name = table->signals[index];
+    //*name = table->signals[index];
+    memcpy(*name, table->signals[index], strlen(table->signals[index])+1);
     return RECON_OK;
 }
 
@@ -93,7 +95,8 @@ recon_status recon_wall_table_get_alias(recon_wall_table tab, int index, char** 
     if (index < 0 || index >= table->ndefinedaliases) {
         return RECON_UNDEFINED;
     }
-    *name = table->aliases[index];
+    //*name = table->aliases[index];
+    memcpy(*name, table->aliases[index], strlen(table->aliases[index])+1);
     return RECON_OK;
 }
 
@@ -104,12 +107,12 @@ recon_status recon_wall_table_add_alias(recon_wall_table tab, const char* alias,
         // Error
         return RECON_ALREADY_DEFINED;
     }
-    /*
-        if (recon_wall_table_find_signal(table, name, &other) == RECON_OK) {
-            // Error
-            return RECON_NAME_NOT_UNIQUE;
-        }
-     */
+    //Should we test if the base signal exists in the table?
+    if (recon_wall_table_find_signal(table, signal, &other) != RECON_OK) {
+        // Error - base signal not found
+        return RECON_NOT_FOUND;
+    }
+     
     table->aliases[table->ndefinedaliases] = (char*) malloc(strlen(alias)+1);
     memcpy(table->aliases[table->ndefinedaliases], alias, strlen(alias)+1);
     table->aliased[table->ndefinedaliases] = (char*) malloc(strlen(signal)+1);

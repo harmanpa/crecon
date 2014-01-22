@@ -18,13 +18,14 @@ int digits(int);
 
 void test1() {
     int i, j;
-    char* signalname;
+    char* signalname, *aliasname, *transform , *signalnamegot, *aliasnamegot;
     recon_status status;
     recon_wall wall;
     recon_wall wall2;
     recon_wall_table table;
     recon_wall_table table2;
     int nsignals = 100;
+    int naliases = nsignals;
     int nrows = 100000;
     int nflush = 100;
     printf("wallwritetest test 1\n");
@@ -33,20 +34,26 @@ void test1() {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed creating file\n");
         return;
     }
-    status = recon_wall_add_table(wall, "myTable", nsignals, 0, &table);
+    status = recon_wall_add_table(wall, "myTable", nsignals, naliases, &table);
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed adding table\n");
         return;
     }
     for (i = 0; i < nsignals; i++) {
         signalname = (char*) calloc(9 + digits(i), 1);
+        aliasname = (char*) calloc(9 + digits(i), 1);
         sprintf(signalname, "%s%i", "variable", i);
+        sprintf(aliasname, "%i%s", i, "elbairav");
         status = recon_wall_table_add_signal(table, signalname);
         if (status != RECON_OK) {
             printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed adding signal %s, error=%i\n", signalname, status);
             return;
         }
+        status = recon_transform_create_affine(&transform, -1.0, (double)i);
+        status = recon_wall_table_add_alias(table, aliasname, signalname, transform);
         free(signalname);
+        free(aliasname);
+        free(transform);        //Alloc'd in transform_create
     }
     status = recon_wall_flush(wall);
     if (status != RECON_OK) {
@@ -103,7 +110,28 @@ void test1() {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed finding table\n");
         return;
     }
-  
+    for(i=0; i<nsignals; i++) {
+        signalname = (char*) calloc(9 + digits(i), 1);
+        signalnamegot = (char*) calloc(9 + digits(i), 1);
+        aliasname = (char*) calloc(9 + digits(i), 1);
+        aliasnamegot = (char*) calloc(9 + digits(i), 1);
+        sprintf(signalname, "%s%i", "variable", i);
+        sprintf(aliasname, "%i%s", i, "elbairav");
+        status = recon_wall_table_get_signal(table2, i, &signalnamegot);
+        if(status != RECON_OK || strcmp(signalname, signalnamegot) != 0) {
+            printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed finding signal\n");
+            return;
+        }
+        status = recon_wall_table_get_alias(table2, i, &aliasnamegot);
+        if(status != RECON_OK || strcmp(aliasname, aliasnamegot) != 0) {
+            printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed finding alias\n");
+            return;
+        }
+        free(signalname);
+        free(aliasname);
+        free(signalnamegot);
+        free(aliasnamegot);
+    }
     status = recon_wall_close(wall2);
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed close\n");
