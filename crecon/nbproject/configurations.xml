@@ -14,7 +14,6 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>crecon_impl.h</itemPath>
-      <itemPath>crecon_meld.c</itemPath>
       <itemPath>crecon_transform.c</itemPath>
       <itemPath>crecon_util.c</itemPath>
       <itemPath>crecon_wall.c</itemPath>
@@ -60,8 +59,6 @@
       <item path="crecon.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="crecon_impl.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="crecon_meld.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="crecon_transform.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -128,8 +125,6 @@
       <item path="crecon.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="crecon_impl.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="crecon_meld.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="crecon_transform.c" ex="false" tool="0" flavor2="0">
       </item>
