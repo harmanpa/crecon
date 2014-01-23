@@ -18,6 +18,15 @@ void recon_util_tic(void** t) {
 long recon_util_toc(void* t) {
     return 0L;
 }
+
+int recon_util_digits(int n) {
+    int count = 1;
+    while (n != 0) {
+        n /= 10;
+        ++count;
+    }
+    return count;
+}
 /*
 
 void recon_ibuffer_append(recon_ibuffer* buffer, int i) {

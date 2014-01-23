@@ -1,7 +1,5 @@
 #include "crecon_impl.h"
 
-static char* __recon_size_placeholder = "XXXX";
-
 recon_status recon_wall_table_start_row(recon_wall_table tab) {
     wall_table* table = (wall_table*) tab;
     wall_file* file = (wall_file*) table->wall;
@@ -55,7 +53,7 @@ recon_status recon_wall_table_row_add_string(recon_wall_table tab, char* v) {
 }
 
 recon_status recon_wall_table_end_row(recon_wall_table tab) {
-    int size;
+    uint32_t size;
     char* bytes = (char*)malloc(4);
     wall_table* table = (wall_table*) tab;
     wall_file* file = (wall_file*) table->wall;
@@ -63,6 +61,7 @@ recon_status recon_wall_table_end_row(recon_wall_table tab) {
         return RECON_INCOMPLETE_ROW;
     }
     size = file->buffer->size - (file->positionatrowstart + 4);
+    recon_util_int_to_bytes(size, bytes);
     msgpack_sbuffer_insert(file->buffer, file->positionatrowstart, bytes, 4);
     file->currentrowtable = NULL;
     file->currentrowtablesize = 0;

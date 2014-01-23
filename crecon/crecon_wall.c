@@ -78,7 +78,29 @@ recon_status recon_wall_visit_fmeta(wall_file* wall, msgpack_object_map map) {
 }
 
 recon_status recon_wall_visit_objs(wall_file* wall, msgpack_object_map map) {
-    return RECON_OK;
+    int i;
+    recon_status status = RECON_OK;
+    wall->nobjects = map.size;
+    wall->objects = (wall_object*) malloc(map.size * sizeof (wall_object));
+    for (i = 0; i < map.size; i++) {
+        status = recon_wall_visit_object(wall, map.ptr[i].key.via.raw.ptr, map.ptr[i].key.via.raw.size, map.ptr[i].val.via.map);
+        if (RECON_OK != status) {
+            return status;
+        }
+    }
+    return status;
+}
+
+recon_status recon_wall_visit_object(wall_file* wall, char* name, uint32_t namesize, msgpack_object_map map) {
+    int i;
+    recon_status status = RECON_OK;
+    recon_wall_object object;
+    char* objectname = (char*)malloc(namesize+1);
+    memcpy(objectname, name, namesize);
+    objectname[namesize] = '\0';
+    status = recon_wall_add_object(wall, objectname, &object);
+    //TODO: Process object meta data.
+    return status;
 }
 
 recon_status recon_wall_visit_tables(wall_file* wall, msgpack_object_map map) {
@@ -240,6 +262,7 @@ recon_status recon_wall_create(char* filename, int nTables, int nObjects, recon_
     wall->packer = msgpack_packer_new(wall->buffer, msgpack_sbuffer_write);
     wall->finalized = RECON_FALSE;
     wall->currentrowtable = NULL;
+    wall->currentfield = NULL;
     return RECON_OK;
 }
 
@@ -266,6 +289,7 @@ recon_status recon_wall_finalize(recon_wall wall) {
     int i, j;
     wall_file* file = (wall_file*) wall;
     wall_table* table;
+    wall_object* object;
     recon_status status = RECON_OK;
     if (file->finalized) {
         return status;
@@ -334,7 +358,17 @@ recon_status recon_wall_finalize(recon_wall wall) {
         // Objects
         msgpack_pack_raw(file->packer, 4);
         msgpack_pack_raw_body(file->packer, "objs", 4);
-        msgpack_pack_map(file->packer, 0);
+        msgpack_pack_map(file->packer, file->nobjects);
+        for(j=0; j<file->nobjects; j++) {
+            if (file->nobjects != file->ndefinedobjects) {    
+                msgpack_sbuffer_clear(file->buffer);
+                return RECON_NOT_FULLY_DEFINED;
+            }
+            object = &(file->objects[j]);
+            msgpack_pack_raw(file->packer, strlen(object->name));
+            msgpack_pack_raw_body(file->packer, object->name, strlen(object->name));
+            msgpack_pack_map(file->packer, 0);
+        }
 
         // Write fixed header
         size = file->buffer->size;
