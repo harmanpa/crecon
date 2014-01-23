@@ -14,22 +14,26 @@
 /*
  * Simple C Test Suite
  */
-int digits(int);
 
 void test1() {
     int i, j;
     char* signalname, *aliasname, *transform , *signalnamegot, *aliasnamegot;
+    char* fieldname;
     recon_status status;
     recon_wall wall;
     recon_wall wall2;
     recon_wall_table table;
     recon_wall_table table2;
+    recon_wall_object object;
+    recon_wall_object object2;
     int nsignals = 100;
     int naliases = nsignals;
     int nrows = 100000;
     int nflush = 100;
+    int nobjects = 1;
+    int nfields = 10;
     printf("wallwritetest test 1\n");
-    status = recon_wall_create("test.wll", 1, 0, &wall);
+    status = recon_wall_create("test.wll", 1, nobjects, &wall);
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed creating file\n");
         return;
@@ -40,8 +44,8 @@ void test1() {
         return;
     }
     for (i = 0; i < nsignals; i++) {
-        signalname = (char*) calloc(9 + digits(i), 1);
-        aliasname = (char*) calloc(9 + digits(i), 1);
+        signalname = (char*) calloc(9 + recon_util_digits(i), 1);
+        aliasname = (char*) calloc(9 + recon_util_digits(i), 1);
         sprintf(signalname, "%s%i", "variable", i);
         sprintf(aliasname, "%i%s", i, "elbairav");
         status = recon_wall_table_add_signal(table, signalname);
@@ -55,9 +59,31 @@ void test1() {
         free(aliasname);
         free(transform);        //Alloc'd in transform_create
     }
+    status = recon_wall_add_object(wall, "object1", &object);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed to add object\n");
+        return;
+    }
+    
     status = recon_wall_flush(wall);
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed flush\n");
+        return;
+    }
+    status = recon_wall_start_field_entry(object);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed to start field entry\n");
+        return;
+    }
+    for (i = 0; i < nfields; i++) {
+        fieldname = (char*) malloc(6+recon_util_digits(i));
+        sprintf(fieldname, "field%i", i);
+        status = recon_wall_object_add_field_int(object, fieldname, i);
+        free(fieldname);
+    }
+    status = recon_wall_end_field_entry(object);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed to end field entry\n");
         return;
     }
     for (i = 0; i < nrows; i++) {
@@ -111,10 +137,10 @@ void test1() {
         return;
     }
     for(i=0; i<nsignals; i++) {
-        signalname = (char*) calloc(9 + digits(i), 1);
-        signalnamegot = (char*) calloc(9 + digits(i), 1);
-        aliasname = (char*) calloc(9 + digits(i), 1);
-        aliasnamegot = (char*) calloc(9 + digits(i), 1);
+        signalname = (char*) calloc(9 + recon_util_digits(i), 1);
+        signalnamegot = (char*) calloc(9 + recon_util_digits(i), 1);
+        aliasname = (char*) calloc(9 + recon_util_digits(i), 1);
+        aliasnamegot = (char*) calloc(9 + recon_util_digits(i), 1);
         sprintf(signalname, "%s%i", "variable", i);
         sprintf(aliasname, "%i%s", i, "elbairav");
         status = recon_wall_table_get_signal(table2, i, &signalnamegot);
@@ -131,6 +157,11 @@ void test1() {
         free(aliasname);
         free(signalnamegot);
         free(aliasnamegot);
+    }
+    status = recon_wall_find_object(wall2, "object1", &object2);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed to find object\n");
+        return;
     }
     status = recon_wall_close(wall2);
     if (status != RECON_OK) {
@@ -166,11 +197,3 @@ int main(int argc, char** argv) {
     return (EXIT_SUCCESS);
 }
 
-int digits(int n) {
-    int count = 1;
-    while (n != 0) {
-        n /= 10;
-        ++count;
-    }
-    return count;
-}

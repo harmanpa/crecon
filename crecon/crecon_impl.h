@@ -14,6 +14,8 @@ extern "C" {
     typedef unsigned char recon_booleantype;
 #define RECON_FALSE 0;
 #define RECON_TRUE 1;
+    
+    static char* __recon_size_placeholder = "XXXX";
 
     typedef struct {
         recon_wall wall;
@@ -28,10 +30,22 @@ extern "C" {
         char** transforms;
         int nrows;
     } wall_table;
-
+    
+    typedef struct {
+        char* name;
+        char* field;
+    } wall_field;
+    
     typedef struct {
         recon_wall wall;
         char* name;
+        wall_field* fields;
+        wall_field* bufferedfields;
+        int sizefields;
+        int sizebufferedfields;
+        int ndefinedfields;
+        int nbufferedfields;
+        void *objmeta;
     } wall_object;
 
     typedef struct {
@@ -54,6 +68,9 @@ extern "C" {
         int currentrowtablesize;
         int currentrowwritten;
         size_t positionatrowstart;
+        //Field writing variables
+        wall_object* currentfield;
+        size_t positionatfieldstart;
     } wall_file;
     
     /**

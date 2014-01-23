@@ -15,6 +15,7 @@
 #define RECON_NOT_FULLY_DEFINED -10
 #define RECON_UNDEFINED -11
 #define RECON_INCOMPLETE_ROW -12
+#define RECON_INCOMPLETE_FIELD -13
 
 #ifdef	__cplusplus
 extern "C" {
@@ -217,9 +218,9 @@ extern "C" {
     recon_status recon_wall_get_object(recon_wall,int,recon_wall_object*);
     recon_status recon_wall_find_object(recon_wall,const char*,recon_wall_object*);
     
-    recon_status recon_wall_object_add_field_string(recon_wall_object, const char*);
-    recon_status recon_wall_object_add_field_double(recon_wall_object, double);
-    recon_status recon_wall_object_add_field_int(recon_wall_object, int);
+    recon_status recon_wall_object_add_field_string(recon_wall_object, const char*, const char*);
+    recon_status recon_wall_object_add_field_double(recon_wall_object, const char*, double);
+    recon_status recon_wall_object_add_field_int(recon_wall_object, const char*, int);
 
     // TRANSFORMATIONS
 
