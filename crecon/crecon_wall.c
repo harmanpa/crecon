@@ -62,13 +62,13 @@ recon_status recon_wall_open(char *filename, recon_wall* out) {
 }
 
 recon_status recon_wall_visit_keyvalue(wall_file* wall, msgpack_object key, msgpack_object value) {
-    if(memcmp(key.via.raw.ptr, "fmeta", key.via.raw.size)==0) {
+    if (memcmp(key.via.raw.ptr, "fmeta", key.via.raw.size) == 0) {
         return recon_wall_visit_fmeta(wall, value.via.map);
     }
-    if(memcmp(key.via.raw.ptr, "tabs", key.via.raw.size)==0) {
+    if (memcmp(key.via.raw.ptr, "tabs", key.via.raw.size) == 0) {
         return recon_wall_visit_tables(wall, value.via.map);
     }
-    if(memcmp(key.via.raw.ptr, "objs", key.via.raw.size)==0) {
+    if (memcmp(key.via.raw.ptr, "objs", key.via.raw.size) == 0) {
         return recon_wall_visit_objs(wall, value.via.map);
     }
 }
@@ -304,56 +304,52 @@ recon_status recon_wall_finalize(recon_wall wall) {
         // Tables
         msgpack_pack_raw(file->packer, 4);
         msgpack_pack_raw_body(file->packer, "tabs", 4);
-        if (file->ntables == 0) {
-            msgpack_pack_nil(file->packer);
-        } else {
-            msgpack_pack_map(file->packer, file->ntables);
-            for (i = 0; i < file->ntables; i++) {
-                table = &(file->tables[i]);
-                if (table->ndefinedsignals < table->nsignals || table->ndefinedaliases < table->naliases) {
-                    // Throw away written data
-                    msgpack_sbuffer_clear(file->buffer);
-                    return RECON_NOT_FULLY_DEFINED;
-                }
-                msgpack_pack_raw(file->packer, strlen(table->name));
-                msgpack_pack_raw_body(file->packer, table->name, strlen(table->name));
-                msgpack_pack_map(file->packer, 4);
-                // Table Meta Data
-                msgpack_pack_raw(file->packer, 5);
-                msgpack_pack_raw_body(file->packer, "tmeta", 5);
-                msgpack_pack_map(file->packer, 0);
-                // Signals
-                msgpack_pack_raw(file->packer, 4);
-                msgpack_pack_raw_body(file->packer, "sigs", 4);
-                msgpack_pack_array(file->packer, table->nsignals);
-                for (j = 0; j < table->nsignals; j++) {
-                    msgpack_pack_raw(file->packer, strlen(table->signals[j]));
-                    msgpack_pack_raw_body(file->packer, table->signals[j], strlen(table->signals[j]));
-                }
-                // Aliases
-                msgpack_pack_raw(file->packer, 3);
-                msgpack_pack_raw_body(file->packer, "als", 3);
-                msgpack_pack_map(file->packer, table->naliases);
-                for (j = 0; j < table->naliases; j++) {
-                    msgpack_pack_raw(file->packer, strlen(table->aliases[j]));
-                    msgpack_pack_raw_body(file->packer, table->aliases[j], strlen(table->aliases[j]));
-                    msgpack_pack_map(file->packer, table->transforms[j] == NULL ? 1 : 2);
-                    msgpack_pack_raw(file->packer, 1);
-                    msgpack_pack_raw_body(file->packer, "s", 1);
-                    msgpack_pack_raw(file->packer, strlen(table->aliased[j]));
-                    msgpack_pack_raw_body(file->packer, table->aliased[j], strlen(table->aliased[j]));
-                    if (table->transforms[j] != NULL) {
-                        msgpack_pack_raw(file->packer, 1);
-                        msgpack_pack_raw_body(file->packer, "t", 1);
-                        msgpack_pack_raw(file->packer, strlen(table->transforms[j]));
-                        msgpack_pack_raw_body(file->packer, table->transforms[j], strlen(table->transforms[j]));
-                    }
-                }
-                // Variable Meta Data
-                msgpack_pack_raw(file->packer, 5);
-                msgpack_pack_raw_body(file->packer, "vmeta", 5);
-                msgpack_pack_map(file->packer, 0);
+        msgpack_pack_map(file->packer, file->ntables);
+        for (i = 0; i < file->ntables; i++) {
+            table = &(file->tables[i]);
+            if (table->ndefinedsignals < table->nsignals || table->ndefinedaliases < table->naliases) {
+                // Throw away written data
+                msgpack_sbuffer_clear(file->buffer);
+                return RECON_NOT_FULLY_DEFINED;
             }
+            msgpack_pack_raw(file->packer, strlen(table->name));
+            msgpack_pack_raw_body(file->packer, table->name, strlen(table->name));
+            msgpack_pack_map(file->packer, 4);
+            // Table Meta Data
+            msgpack_pack_raw(file->packer, 5);
+            msgpack_pack_raw_body(file->packer, "tmeta", 5);
+            msgpack_pack_map(file->packer, 0);
+            // Signals
+            msgpack_pack_raw(file->packer, 4);
+            msgpack_pack_raw_body(file->packer, "sigs", 4);
+            msgpack_pack_array(file->packer, table->nsignals);
+            for (j = 0; j < table->nsignals; j++) {
+                msgpack_pack_raw(file->packer, strlen(table->signals[j]));
+                msgpack_pack_raw_body(file->packer, table->signals[j], strlen(table->signals[j]));
+            }
+            // Aliases
+            msgpack_pack_raw(file->packer, 3);
+            msgpack_pack_raw_body(file->packer, "als", 3);
+            msgpack_pack_map(file->packer, table->naliases);
+            for (j = 0; j < table->naliases; j++) {
+                msgpack_pack_raw(file->packer, strlen(table->aliases[j]));
+                msgpack_pack_raw_body(file->packer, table->aliases[j], strlen(table->aliases[j]));
+                msgpack_pack_map(file->packer, table->transforms[j] == NULL ? 1 : 2);
+                msgpack_pack_raw(file->packer, 1);
+                msgpack_pack_raw_body(file->packer, "s", 1);
+                msgpack_pack_raw(file->packer, strlen(table->aliased[j]));
+                msgpack_pack_raw_body(file->packer, table->aliased[j], strlen(table->aliased[j]));
+                if (table->transforms[j] != NULL) {
+                    msgpack_pack_raw(file->packer, 1);
+                    msgpack_pack_raw_body(file->packer, "t", 1);
+                    msgpack_pack_raw(file->packer, strlen(table->transforms[j]));
+                    msgpack_pack_raw_body(file->packer, table->transforms[j], strlen(table->transforms[j]));
+                }
+            }
+            // Variable Meta Data
+            msgpack_pack_raw(file->packer, 5);
+            msgpack_pack_raw_body(file->packer, "vmeta", 5);
+            msgpack_pack_map(file->packer, 0);
         }
         // Objects
         msgpack_pack_raw(file->packer, 4);

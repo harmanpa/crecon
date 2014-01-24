@@ -35,7 +35,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/crecon_meld.o \
 	${OBJECTDIR}/crecon_transform.o \
 	${OBJECTDIR}/crecon_util.o \
 	${OBJECTDIR}/crecon_wall.o \
@@ -80,11 +79,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcrecon.a: ${OBJECTFILES}
 	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcrecon.a
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcrecon.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcrecon.a
-
-${OBJECTDIR}/crecon_meld.o: crecon_meld.c 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_meld.o crecon_meld.c
 
 ${OBJECTDIR}/crecon_transform.o: crecon_transform.c 
 	${MKDIR} -p ${OBJECTDIR}
@@ -156,19 +150,6 @@ ${TESTDIR}/tests/wallwritetest.o: tests/wallwritetest.c
 	${RM} $@.d
 	$(COMPILE.c) -g -I. -MMD -MP -MF $@.d -o ${TESTDIR}/tests/wallwritetest.o tests/wallwritetest.c
 
-
-${OBJECTDIR}/crecon_meld_nomain.o: ${OBJECTDIR}/crecon_meld.o crecon_meld.c 
-	${MKDIR} -p ${OBJECTDIR}
-	@NMOUTPUT=`${NM} ${OBJECTDIR}/crecon_meld.o`; \
-	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
-	then  \
-	    ${RM} $@.d;\
-	    $(COMPILE.c) -g -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/crecon_meld_nomain.o crecon_meld.c;\
-	else  \
-	    ${CP} ${OBJECTDIR}/crecon_meld.o ${OBJECTDIR}/crecon_meld_nomain.o;\
-	fi
 
 ${OBJECTDIR}/crecon_transform_nomain.o: ${OBJECTDIR}/crecon_transform.o crecon_transform.c 
 	${MKDIR} -p ${OBJECTDIR}
