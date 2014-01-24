@@ -300,7 +300,7 @@ recon_status recon_wall_finalize(recon_wall wall) {
         // Meta
         msgpack_pack_raw(file->packer, 5);
         msgpack_pack_raw_body(file->packer, "fmeta", 5);
-        msgpack_pack_nil(file->packer);
+        msgpack_pack_map(file->packer, 0);
         // Tables
         msgpack_pack_raw(file->packer, 4);
         msgpack_pack_raw_body(file->packer, "tabs", 4);

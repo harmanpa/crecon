@@ -83,6 +83,8 @@ recon_status recon_wall_end_field_entry(recon_wall_object obj) {
     for(i = 0; i<object->nbufferedfields; i++) {
         msgpack_pack_raw(file->packer, strlen(object->bufferedfields[i].name));
         msgpack_pack_raw_body(file->packer, object->bufferedfields[i].name, strlen(object->bufferedfields[i].name));
+        msgpack_pack_raw(file->packer, strlen(object->bufferedfields[i].field));
+        msgpack_pack_raw_body(file->packer, object->bufferedfields[i].field, strlen(object->bufferedfields[i].field));
     }
     
     size = file->buffer->size - (file->positionatfieldstart + 4);
