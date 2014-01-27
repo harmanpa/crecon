@@ -24,6 +24,20 @@ recon_status recon_wall_add_object(recon_wall wall, const char* name, recon_wall
     return RECON_OK;
 }
 
+recon_status recon_wall_free_object(wall_object* object) {
+    int i;
+    free(object->name);
+    for(i=0;i<object->ndefinedfields;i++) {
+        recon_wall_free_object_field(object->fields[i]);
+    }
+    free(object->fields);
+}
+
+recon_status recon_wall_free_object_field(wall_field* field) {
+    free(field->name);
+    free(field->field);
+}
+
 recon_status recon_wall_n_objects(recon_wall wall, int* n) {
     wall_file* file = (wall_file*) wall;
     *n = file->nobjects;
