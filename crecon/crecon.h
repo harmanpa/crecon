@@ -191,6 +191,30 @@ extern "C" {
      * @param The value to be written
      */
     recon_status recon_wall_table_row_add_string(recon_wall_table, char*);
+    
+    /**
+     * Append a double array to the current row
+     * @param The table to be written to
+     * @param The value to be written
+     * @param The number of values in the array
+     */
+    recon_status recon_wall_table_row_add_double_array(recon_wall_table, double*, int);
+    
+    /**
+     * Append an int array to the current row
+     * @param The table to be written to
+     * @param The value to be written
+     * @param The number of values in the array
+     */
+    recon_status recon_wall_table_row_add_int_array(recon_wall_table, int*, int);
+    
+    /**
+     * Append a string array to the current row
+     * @param The table to be written to
+     * @param The value to be written
+     * @param The number of values in the array
+     */
+    recon_status recon_wall_table_row_add_string_array(recon_wall_table, char**, int);
 
     /**
      * Close the current row
