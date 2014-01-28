@@ -1,6 +1,9 @@
 #include "crecon_impl.h"
 
 recon_status recon_wall_open(char *filename, recon_wall* out) {
+	wall_file* wall;
+	msgpack_object_kv* p;
+	msgpack_object_kv* pend;
     recon_status status = RECON_OK;
     uint32_t* header_size;
     char* header_data;
@@ -11,7 +14,7 @@ recon_status recon_wall_open(char *filename, recon_wall* out) {
         return RECON_READ_ERROR;
     }
     *out = (recon_wall*) malloc(sizeof (wall_file));
-    wall_file* wall = (wall_file*) * out;
+    wall = (wall_file*) * out;
     wall->fp = fp;
     rewind(wall->fp);
     wall->ndefinedtables = 0;
@@ -40,13 +43,13 @@ recon_status recon_wall_open(char *filename, recon_wall* out) {
         return RECON_DESERIALIZATION_ERROR;
     }
     if (object.via.map.size != 0) {
-        msgpack_object_kv* p = object.via.map.ptr;
+        p = object.via.map.ptr;
         status = recon_wall_visit_keyvalue(wall, p->key, p->val);
         if (RECON_OK != status) {
             return status;
         }
         ++p;
-        msgpack_object_kv * const pend = object.via.map.ptr + object.via.map.size;
+        pend = object.via.map.ptr + object.via.map.size;
         for (; p < pend; ++p) {
             status = recon_wall_visit_keyvalue(wall, p->key, p->val);
             if (RECON_OK != status) {
@@ -71,6 +74,7 @@ recon_status recon_wall_visit_keyvalue(wall_file* wall, msgpack_object key, msgp
     if (memcmp(key.via.raw.ptr, "objs", key.via.raw.size) == 0) {
         return recon_wall_visit_objs(wall, value.via.map);
     }
+	return RECON_OK;
 }
 
 recon_status recon_wall_visit_fmeta(wall_file* wall, msgpack_object_map map) {
@@ -260,9 +264,11 @@ recon_status recon_wall_visit_table_elements(msgpack_object_map map, msgpack_obj
 }
 
 recon_status recon_wall_create(char* filename, int nTables, int nObjects, recon_wall* out) {
+	FILE* fp;
+	wall_file* wall;
     *out = (recon_wall*) malloc(sizeof (wall_file));
-    FILE* fp = fopen(filename, "w");
-    wall_file* wall = (wall_file*) * out;
+    fp = fopen(filename, "w");
+    wall = (wall_file*) * out;
     wall->fp = fp;
     wall->nfmeta = 0;
     wall->ntables = nTables;
@@ -299,7 +305,7 @@ recon_status recon_wall_close(recon_wall wall) {
         file->buffer = NULL;
     }
     for (i = 0; i < file->ndefinedtables; i++) {
-        recon_wall_free_table(file->tables[i]);
+        recon_wall_free_table(&(file->tables[i]));
     }
     free(file->tables);
 /*

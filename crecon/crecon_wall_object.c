@@ -28,14 +28,16 @@ recon_status recon_wall_free_object(wall_object* object) {
     int i;
     free(object->name);
     for(i=0;i<object->ndefinedfields;i++) {
-        recon_wall_free_object_field(object->fields[i]);
+        recon_wall_free_object_field(&(object->fields[i]));
     }
     free(object->fields);
+	return RECON_OK;
 }
 
 recon_status recon_wall_free_object_field(wall_field* field) {
     free(field->name);
     free(field->field);
+	return RECON_OK;
 }
 
 recon_status recon_wall_n_objects(recon_wall wall, int* n) {

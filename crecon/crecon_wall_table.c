@@ -55,9 +55,10 @@ recon_status recon_wall_free_table(wall_table* table) {
         //free(table->aliases[i]);
         //free(table->aliased[i]);
         //if (table->transforms[i]) {
-            //free(table->transforms[i]);
+        //    free(table->transforms[i]);
         //}
     }
+	return RECON_OK;
 }
 
 recon_status recon_wall_table_add_signal(recon_wall_table tab, const char* name) {

@@ -16,7 +16,8 @@ recon_status recon_transform_create_inverse(char** t) {
 
 recon_status recon_transform_create_affine(char** t, double scale, double offset) {
     int max_sig_digits = 16;
-    char transform_string[strlen("aff(-.,-.)") + 2*max_sig_digits+1];
+    char* transform_string;
+	transform_string = (char*)malloc(strlen("aff(-.,-.)") + 2*max_sig_digits+1);
     if(scale==1.0 && offset==0.0) {
         return recon_transform_create_none(t);
     }
