@@ -43,6 +43,7 @@
 *.sdf
 *.opensdf
 *.unsuccessfulbuild
+*.filters
 ipch/
 [Oo]bj/
 [Bb]in
