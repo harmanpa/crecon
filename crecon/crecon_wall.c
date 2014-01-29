@@ -19,7 +19,6 @@ recon_status recon_wall_open(char *filename, recon_wall* out) {
     wall->finalized = RECON_FALSE;   
     wall->buffer = msgpack_sbuffer_new();
     wall->packer = msgpack_packer_new(wall->buffer, msgpack_sbuffer_write);
-    wall->packer = msgpack_packer_new(wall->buffer, msgpack_sbuffer_write);
 
     header_size = (uint32_t*) malloc(sizeof (uint32_t));
     status = recon_wall_unpack_fixed_header(wall, header_size);
@@ -33,8 +32,6 @@ recon_status recon_wall_open(char *filename, recon_wall* out) {
     header = (msgpack_unpacked*) malloc(sizeof (msgpack_unpacked));
     msgpack_unpacked_init(header);
     msgpack_unpack_next(header, header_data, *header_size, NULL);
-    free(header_size);
-    free(header_data);
     object = header->data;
     if (object.type != MSGPACK_OBJECT_MAP) {
         return RECON_DESERIALIZATION_ERROR;
@@ -56,6 +53,9 @@ recon_status recon_wall_open(char *filename, recon_wall* out) {
     }
     msgpack_unpacked_destroy(header);
     free(header);
+    free(header_size);
+    free(header_data);
+    wall->currentrowtable = NULL;
     wall->finalized = RECON_TRUE;
     //todo: visit rows?
     return status;
@@ -104,7 +104,7 @@ recon_status recon_wall_visit_object(wall_file* wall, char* name, uint32_t names
 }
 
 recon_status recon_wall_visit_tables(wall_file* wall, msgpack_object_map map) {
-    int i;
+    uint32_t i;
     recon_status status = RECON_OK;
     wall->ntables = map.size;
     wall->tables = (wall_table*) malloc(map.size * sizeof (wall_table));
@@ -139,8 +139,8 @@ recon_status recon_wall_visit_table(wall_file* wall, char* name, uint32_t namesi
     return status;
 }
 
-recon_status recon_wall_table_visit_signals(recon_wall_table table, msgpack_object_array array, int num_signals) {
-    int i = 0;
+recon_status recon_wall_table_visit_signals(recon_wall_table table, msgpack_object_array array, uint32_t num_signals) {
+    uint32_t i = 0;
     uint32_t string_size = 2;
     recon_status status = RECON_OK;
     char* variable_name = (char*) malloc(string_size);    //Yuk - nominal value
@@ -157,8 +157,8 @@ recon_status recon_wall_table_visit_signals(recon_wall_table table, msgpack_obje
     return status;
 }
 
-recon_status recon_wall_table_visit_aliases(recon_wall_table table, msgpack_object_map map, int num_aliases) {
-    int i = 0;
+recon_status recon_wall_table_visit_aliases(recon_wall_table table, msgpack_object_map map, uint32_t num_aliases) {
+    uint32_t i = 0;
     uint32_t string_size = 2;
     char *aliasname, *aliasof, *transform;
     recon_status status = RECON_OK;
@@ -210,7 +210,7 @@ recon_status recon_wall_table_visit_alias_fields(msgpack_object_map map, char** 
 }
 
 recon_status recon_wall_visit_table_elements(msgpack_object_map map, msgpack_object_map* tmeta, msgpack_object_array* signals, msgpack_object_map* aliases, msgpack_object_map* vmeta) {
-    int i;
+    uint32_t i;
     for (i=0; i < map.size; i++) {
         if (memcmp(map.ptr[i].key.via.raw.ptr, "tmeta", map.ptr[i].key.via.raw.size)==0) {
             //Any restrictions on structure of vals?

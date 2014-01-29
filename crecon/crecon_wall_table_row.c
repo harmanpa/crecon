@@ -99,7 +99,7 @@ recon_status recon_wall_table_row_add_string_array(recon_wall_table tab, char **
 }
 
 recon_status recon_wall_table_end_row(recon_wall_table tab) {
-    uint32_t size;
+    size_t size;
     char* bytes = (char*)malloc(4);
     wall_table* table = (wall_table*) tab;
     wall_file* file = (wall_file*) table->wall;
