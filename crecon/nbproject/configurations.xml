@@ -17,6 +17,7 @@
       <itemPath>crecon_transform.c</itemPath>
       <itemPath>crecon_util.c</itemPath>
       <itemPath>crecon_wall.c</itemPath>
+      <itemPath>crecon_wall_meta.c</itemPath>
       <itemPath>crecon_wall_object.c</itemPath>
       <itemPath>crecon_wall_table.c</itemPath>
       <itemPath>crecon_wall_table_row.c</itemPath>
@@ -65,6 +66,8 @@
       <item path="crecon_util.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="crecon_wall.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_wall_meta.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="crecon_wall_object.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -131,6 +134,8 @@
       <item path="crecon_util.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="crecon_wall.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="crecon_wall_meta.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="crecon_wall_object.c" ex="false" tool="0" flavor2="0">
       </item>
