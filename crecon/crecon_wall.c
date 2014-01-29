@@ -1,6 +1,9 @@
 #include "crecon_impl.h"
 
 recon_status recon_wall_open(char *filename, recon_wall* out) {
+    wall_file* wall;
+    msgpack_object_kv* p;
+    msgpack_object_kv* pend;
     recon_status status = RECON_OK;
     uint32_t* header_size;
     char* header_data;
@@ -11,12 +14,12 @@ recon_status recon_wall_open(char *filename, recon_wall* out) {
         return RECON_READ_ERROR;
     }
     *out = (recon_wall*) malloc(sizeof (wall_file));
-    wall_file* wall = (wall_file*) * out;
+    wall = (wall_file*) * out;
     wall->fp = fp;
     rewind(wall->fp);
     wall->ndefinedtables = 0;
     wall->ndefinedobjects = 0;
-    wall->finalized = RECON_FALSE;   
+    wall->finalized = RECON_FALSE;
     wall->buffer = msgpack_sbuffer_new();
     wall->packer = msgpack_packer_new(wall->buffer, msgpack_sbuffer_write);
 
@@ -37,13 +40,13 @@ recon_status recon_wall_open(char *filename, recon_wall* out) {
         return RECON_DESERIALIZATION_ERROR;
     }
     if (object.via.map.size != 0) {
-        msgpack_object_kv* p = object.via.map.ptr;
+        p = object.via.map.ptr;
         status = recon_wall_visit_keyvalue(wall, p->key, p->val);
         if (RECON_OK != status) {
             return status;
         }
         ++p;
-        msgpack_object_kv * const pend = object.via.map.ptr + object.via.map.size;
+        pend = object.via.map.ptr + object.via.map.size;
         for (; p < pend; ++p) {
             status = recon_wall_visit_keyvalue(wall, p->key, p->val);
             if (RECON_OK != status) {
@@ -71,6 +74,7 @@ recon_status recon_wall_visit_keyvalue(wall_file* wall, msgpack_object key, msgp
     if (memcmp(key.via.raw.ptr, "objs", key.via.raw.size) == 0) {
         return recon_wall_visit_objs(wall, value.via.map);
     }
+    return RECON_OK;
 }
 
 recon_status recon_wall_visit_fmeta(wall_file* wall, msgpack_object_map map) {
@@ -95,7 +99,7 @@ recon_status recon_wall_visit_object(wall_file* wall, char* name, uint32_t names
     int i;
     recon_status status = RECON_OK;
     recon_wall_object object;
-    char* objectname = (char*)malloc(namesize+1);
+    char* objectname = (char*) malloc(namesize + 1);
     memcpy(objectname, name, namesize);
     objectname[namesize] = '\0';
     status = recon_wall_add_object(wall, objectname, &object);
@@ -122,20 +126,29 @@ recon_status recon_wall_visit_table(wall_file* wall, char* name, uint32_t namesi
     msgpack_object_map aliasesmap, tmetamap, vmetamap;
     recon_status status = RECON_OK;
     recon_wall_table table;
-    char* tablename = (char*)malloc(namesize+1);
+    char* tablename = (char*) malloc(namesize + 1);
     memcpy(tablename, name, namesize);
     tablename[namesize] = '\0';
-    
+
     status = recon_wall_visit_table_elements(map, &tmetamap, &signalsmap, &aliasesmap, &vmetamap);
     if (status != RECON_OK) {
         return status;
     }
-    status = recon_wall_add_table((recon_wall)wall, tablename, signalsmap.size, aliasesmap.size, &table); if (status != RECON_OK) {return status;}
-    status = recon_wall_table_visit_signals(table, signalsmap, signalsmap.size); if (status != RECON_OK) {return status;}
-    status = recon_wall_table_visit_aliases(table, aliasesmap, aliasesmap.size); if (status != RECON_OK) {return status;}
-    
+    status = recon_wall_add_table((recon_wall) wall, tablename, signalsmap.size, aliasesmap.size, &table);
+    if (status != RECON_OK) {
+        return status;
+    }
+    status = recon_wall_table_visit_signals(table, signalsmap, signalsmap.size);
+    if (status != RECON_OK) {
+        return status;
+    }
+    status = recon_wall_table_visit_aliases(table, aliasesmap, aliasesmap.size);
+    if (status != RECON_OK) {
+        return status;
+    }
+
     free(tablename);
-    
+
     return status;
 }
 
@@ -143,15 +156,18 @@ recon_status recon_wall_table_visit_signals(recon_wall_table table, msgpack_obje
     uint32_t i = 0;
     uint32_t string_size = 2;
     recon_status status = RECON_OK;
-    char* variable_name = (char*) malloc(string_size);    //Yuk - nominal value
-    for (i=0; i<num_signals; i++) {
-        if (array.ptr[i].via.raw.size+1>string_size) {
-            variable_name = (char*)realloc(variable_name, array.ptr[i].via.raw.size+1);
-            string_size = array.ptr[i].via.raw.size+1;
+    char* variable_name = (char*) malloc(string_size); //Yuk - nominal value
+    for (i = 0; i < num_signals; i++) {
+        if (array.ptr[i].via.raw.size + 1 > string_size) {
+            variable_name = (char*) realloc(variable_name, array.ptr[i].via.raw.size + 1);
+            string_size = array.ptr[i].via.raw.size + 1;
         }
         memcpy(variable_name, array.ptr[i].via.raw.ptr, array.ptr[i].via.raw.size);
         variable_name[array.ptr[i].via.raw.size] = '\0';
-        status = recon_wall_table_add_signal(table, variable_name); if (status != RECON_OK) {return status;}
+        status = recon_wall_table_add_signal(table, variable_name);
+        if (status != RECON_OK) {
+            return status;
+        }
     }
     free(variable_name);
     return status;
@@ -163,19 +179,25 @@ recon_status recon_wall_table_visit_aliases(recon_wall_table table, msgpack_obje
     char *aliasname, *aliasof, *transform;
     recon_status status = RECON_OK;
     aliasname = (char*) malloc(string_size);
-    aliasof = (char*)malloc(string_size);
-    transform = (char*)malloc(string_size);
-    for(i=0; i<num_aliases; i++) {
-        if(map.ptr[i].val.type != MSGPACK_OBJECT_MAP) {
+    aliasof = (char*) malloc(string_size);
+    transform = (char*) malloc(string_size);
+    for (i = 0; i < num_aliases; i++) {
+        if (map.ptr[i].val.type != MSGPACK_OBJECT_MAP) {
             return RECON_DESERIALIZATION_ERROR;
         }
-        if(map.ptr[i].key.via.raw.size+1>string_size) {
-            aliasname = realloc(aliasname, map.ptr[i].key.via.raw.size+1);
+        if (map.ptr[i].key.via.raw.size + 1 > string_size) {
+            aliasname = realloc(aliasname, map.ptr[i].key.via.raw.size + 1);
         }
         memcpy(aliasname, map.ptr[i].key.via.raw.ptr, map.ptr[i].key.via.raw.size);
-        aliasname[map.ptr[i].key.via.raw.size]='\0';
-        status = recon_wall_table_visit_alias_fields(map.ptr[i].val.via.map, &aliasof, &transform); if (status != RECON_OK) {return status;}
-        status = recon_wall_table_add_alias(table, aliasname, aliasof, map.ptr[i].val.via.map.size==2 ? transform : NULL); if (status != RECON_OK) {return status;}
+        aliasname[map.ptr[i].key.via.raw.size] = '\0';
+        status = recon_wall_table_visit_alias_fields(map.ptr[i].val.via.map, &aliasof, &transform);
+        if (status != RECON_OK) {
+            return status;
+        }
+        status = recon_wall_table_add_alias(table, aliasname, aliasof, map.ptr[i].val.via.map.size == 2 ? transform : NULL);
+        if (status != RECON_OK) {
+            return status;
+        }
     }
     free(aliasname);
     free(aliasof);
@@ -184,18 +206,18 @@ recon_status recon_wall_table_visit_aliases(recon_wall_table table, msgpack_obje
 }
 
 recon_status recon_wall_table_visit_alias_fields(msgpack_object_map map, char** base, char** transform) {
-    if(map.size>0 &&map.size<=2) {
-        if(memcmp(map.ptr[0].key.via.raw.ptr, "s", map.ptr[0].key.via.raw.size)==0){
-            *base = realloc(*base, map.ptr[0].val.via.raw.size+1);
+    if (map.size > 0 && map.size <= 2) {
+        if (memcmp(map.ptr[0].key.via.raw.ptr, "s", map.ptr[0].key.via.raw.size) == 0) {
+            *base = realloc(*base, map.ptr[0].val.via.raw.size + 1);
             memcpy(*base, map.ptr[0].val.via.raw.ptr, map.ptr[0].val.via.raw.size);
             (*base)[map.ptr[0].val.via.raw.size] = '\0';
         } else {
             //Field key should be "s"
             return RECON_DESERIALIZATION_ERROR;
         }
-        if(map.size==2) {
-            if(memcmp(map.ptr[1].key.via.raw.ptr, "t", map.ptr[1].key.via.raw.size)==0){
-                *transform = realloc(*transform, map.ptr[1].val.via.raw.size+1);
+        if (map.size == 2) {
+            if (memcmp(map.ptr[1].key.via.raw.ptr, "t", map.ptr[1].key.via.raw.size) == 0) {
+                *transform = realloc(*transform, map.ptr[1].val.via.raw.size + 1);
                 memcpy(*transform, map.ptr[1].val.via.raw.ptr, map.ptr[1].val.via.raw.size);
                 (*transform)[map.ptr[1].val.via.raw.size] = '\0';
             } else {
@@ -211,23 +233,23 @@ recon_status recon_wall_table_visit_alias_fields(msgpack_object_map map, char** 
 
 recon_status recon_wall_visit_table_elements(msgpack_object_map map, msgpack_object_map* tmeta, msgpack_object_array* signals, msgpack_object_map* aliases, msgpack_object_map* vmeta) {
     uint32_t i;
-    for (i=0; i < map.size; i++) {
-        if (memcmp(map.ptr[i].key.via.raw.ptr, "tmeta", map.ptr[i].key.via.raw.size)==0) {
+    for (i = 0; i < map.size; i++) {
+        if (memcmp(map.ptr[i].key.via.raw.ptr, "tmeta", map.ptr[i].key.via.raw.size) == 0) {
             //Any restrictions on structure of vals?
             *tmeta = map.ptr[i].val.via.map;
-        } else if (memcmp(map.ptr[i].key.via.raw.ptr, "sigs", map.ptr[i].key.via.raw.size)==0) {
+        } else if (memcmp(map.ptr[i].key.via.raw.ptr, "sigs", map.ptr[i].key.via.raw.size) == 0) {
             //Check the value is an array
             if (map.ptr[i].val.type != MSGPACK_OBJECT_ARRAY) {
                 return RECON_DESERIALIZATION_ERROR;
             }
             *signals = map.ptr[i].val.via.array;
-        } else if (memcmp(map.ptr[i].key.via.raw.ptr, "als", map.ptr[i].key.via.raw.size)==0) {
+        } else if (memcmp(map.ptr[i].key.via.raw.ptr, "als", map.ptr[i].key.via.raw.size) == 0) {
             //Should be a map
             if (map.ptr[i].val.type != MSGPACK_OBJECT_MAP) {
                 return RECON_DESERIALIZATION_ERROR;
             }
             *aliases = map.ptr[i].val.via.map;
-        } else if (memcmp(map.ptr[i].key.via.raw.ptr, "vmeta", map.ptr[i].key.via.raw.size)==0) {
+        } else if (memcmp(map.ptr[i].key.via.raw.ptr, "vmeta", map.ptr[i].key.via.raw.size) == 0) {
             //Should be a map
             if (map.ptr[i].val.type != MSGPACK_OBJECT_MAP) {
                 return RECON_DESERIALIZATION_ERROR;
@@ -241,11 +263,12 @@ recon_status recon_wall_visit_table_elements(msgpack_object_map map, msgpack_obj
     return RECON_OK;
 }
 
-
 recon_status recon_wall_create(char* filename, int nTables, int nObjects, recon_wall* out) {
+    FILE* fp;
+    wall_file* wall;
     *out = (recon_wall*) malloc(sizeof (wall_file));
-    FILE* fp = fopen(filename, "w");
-    wall_file* wall = (wall_file*) * out;
+    fp = fopen(filename, "w");
+    wall = (wall_file*) * out;
     wall->fp = fp;
     wall->nfmeta = 0;
     wall->ntables = nTables;
@@ -267,6 +290,7 @@ recon_status recon_wall_create(char* filename, int nTables, int nObjects, recon_
 }
 
 recon_status recon_wall_close(recon_wall wall) {
+    int i;
     wall_file* file = (wall_file*) wall;
     recon_wall_flush(wall);
     if (0 != fclose(file->fp)) {
@@ -280,6 +304,16 @@ recon_status recon_wall_close(recon_wall wall) {
         msgpack_sbuffer_free(file->buffer);
         file->buffer = NULL;
     }
+    for (i = 0; i < file->ndefinedtables; i++) {
+        recon_wall_free_table(&(file->tables[i]));
+    }
+    free(file->tables);
+    /*
+        for (i = 0; i < file->ndefinedobjects; i++) {
+            recon_wall_free_object(file->objects[i]);
+        }
+        free(file->objects);
+     */
     free(wall);
     return RECON_OK;
 }
@@ -355,8 +389,8 @@ recon_status recon_wall_finalize(recon_wall wall) {
         msgpack_pack_raw(file->packer, 4);
         msgpack_pack_raw_body(file->packer, "objs", 4);
         msgpack_pack_map(file->packer, file->nobjects);
-        for(j=0; j<file->nobjects; j++) {
-            if (file->nobjects != file->ndefinedobjects) {    
+        for (j = 0; j < file->nobjects; j++) {
+            if (file->nobjects != file->ndefinedobjects) {
                 msgpack_sbuffer_clear(file->buffer);
                 return RECON_NOT_FULLY_DEFINED;
             }

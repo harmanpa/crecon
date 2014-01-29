@@ -38,7 +38,7 @@ typedef struct msgpack_unpacked {
 	msgpack_object data;
 } msgpack_unpacked;
 
-bool msgpack_unpack_next(msgpack_unpacked* result,
+msgpack_booleantype msgpack_unpack_next(msgpack_unpacked* result,
 		const char* data, size_t len, size_t* off);
 
 /** @} */
@@ -70,7 +70,7 @@ typedef struct msgpack_unpacker {
  * Initializes a streaming deserializer.
  * The initialized deserializer must be destroyed by msgpack_unpacker_destroy(msgpack_unpacker*).
  */
-bool msgpack_unpacker_init(msgpack_unpacker* mpac, size_t initial_buffer_size);
+msgpack_booleantype msgpack_unpacker_init(msgpack_unpacker* mpac, size_t initial_buffer_size);
 
 /**
  * Destroys a streaming deserializer initialized by msgpack_unpacker_init(msgpack_unpacker*, size_t).
@@ -101,7 +101,7 @@ void msgpack_unpacker_free(msgpack_unpacker* mpac);
  * msgpack_unpacker_buffer_capacity(const msgpack_unpacker*) and
  * msgpack_unpacker_buffer_consumed(msgpack_unpacker*).
  */
-static inline bool   msgpack_unpacker_reserve_buffer(msgpack_unpacker* mpac, size_t size);
+static inline msgpack_booleantype   msgpack_unpacker_reserve_buffer(msgpack_unpacker* mpac, size_t size);
 
 /**
  * Gets pointer to the free space of the internal buffer.
@@ -136,7 +136,7 @@ static inline void   msgpack_unpacker_buffer_consumed(msgpack_unpacker* mpac, si
  * Returns true if it successes. Otherwise false is returned.
  * @param pac  pointer to an initialized msgpack_unpacked object.
  */
-bool msgpack_unpacker_next(msgpack_unpacker* mpac, msgpack_unpacked* pac);
+msgpack_booleantype msgpack_unpacker_next(msgpack_unpacker* mpac, msgpack_unpacked* pac);
 
 /**
  * Initializes a msgpack_unpacked object.
@@ -190,13 +190,13 @@ msgpack_unpack(const char* data, size_t len, size_t* off,
 
 static inline size_t msgpack_unpacker_parsed_size(const msgpack_unpacker* mpac);
 
-bool msgpack_unpacker_flush_zone(msgpack_unpacker* mpac);
+msgpack_booleantype msgpack_unpacker_flush_zone(msgpack_unpacker* mpac);
 
-bool msgpack_unpacker_expand_buffer(msgpack_unpacker* mpac, size_t size);
+msgpack_booleantype msgpack_unpacker_expand_buffer(msgpack_unpacker* mpac, size_t size);
 
-static inline bool msgpack_unpacker_reserve_buffer(msgpack_unpacker* mpac, size_t size)
+static inline msgpack_booleantype msgpack_unpacker_reserve_buffer(msgpack_unpacker* mpac, size_t size)
 {
-	if(mpac->free >= size) { return true; }
+	if(mpac->free >= size) { return msgpack_true; }
 	return msgpack_unpacker_expand_buffer(mpac, size);
 }
 

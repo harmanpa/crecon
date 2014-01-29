@@ -1,20 +1,20 @@
 /*
- * MessagePack for C dynamic typing routine
- *
- * Copyright (C) 2008-2009 FURUHASHI Sadayuki
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
+* MessagePack for C dynamic typing routine
+*
+* Copyright (C) 2008-2009 FURUHASHI Sadayuki
+*
+*    Licensed under the Apache License, Version 2.0 (the "License");
+*    you may not use this file except in compliance with the License.
+*    You may obtain a copy of the License at
+*
+*        http://www.apache.org/licenses/LICENSE-2.0
+*
+*    Unless required by applicable law or agreed to in writing, software
+*    distributed under the License is distributed on an "AS IS" BASIS,
+*    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*    See the License for the specific language governing permissions and
+*    limitations under the License.
+*/
 #include "msgpack/object.h"
 #include "msgpack/pack.h"
 #include <stdio.h>
@@ -34,6 +34,10 @@
 
 int msgpack_pack_object(msgpack_packer* pk, msgpack_object d)
 {
+	msgpack_object* o;
+	msgpack_object* oend;
+	msgpack_object_kv* kv;
+	msgpack_object_kv* kvend;
 	switch(d.type) {
 	case MSGPACK_OBJECT_NIL:
 		return msgpack_pack_nil(pk);
@@ -66,8 +70,8 @@ int msgpack_pack_object(msgpack_packer* pk, msgpack_object d)
 			int ret = msgpack_pack_array(pk, d.via.array.size);
 			if(ret < 0) { return ret; }
 
-			msgpack_object* o = d.via.array.ptr;
-			msgpack_object* const oend = d.via.array.ptr + d.via.array.size;
+			o = d.via.array.ptr;
+		    oend = d.via.array.ptr + d.via.array.size;
 			for(; o != oend; ++o) {
 				ret = msgpack_pack_object(pk, *o);
 				if(ret < 0) { return ret; }
@@ -81,8 +85,8 @@ int msgpack_pack_object(msgpack_packer* pk, msgpack_object d)
 			int ret = msgpack_pack_map(pk, d.via.map.size);
 			if(ret < 0) { return ret; }
 
-			msgpack_object_kv* kv = d.via.map.ptr;
-			msgpack_object_kv* const kvend = d.via.map.ptr + d.via.map.size;
+			kv = d.via.map.ptr;
+			kvend = d.via.map.ptr + d.via.map.size;
 			for(; kv != kvend; ++kv) {
 				ret = msgpack_pack_object(pk, kv->key);
 				if(ret < 0) { return ret; }
@@ -101,6 +105,11 @@ int msgpack_pack_object(msgpack_packer* pk, msgpack_object d)
 
 void msgpack_object_print(FILE* out, msgpack_object o)
 {
+	msgpack_object* p;
+	msgpack_object* pend;
+	msgpack_object_kv* kv;
+	msgpack_object_kv* kvend;
+
 	switch(o.type) {
 	case MSGPACK_OBJECT_NIL:
 		fprintf(out, "nil");
@@ -131,10 +140,10 @@ void msgpack_object_print(FILE* out, msgpack_object o)
 	case MSGPACK_OBJECT_ARRAY:
 		fprintf(out, "[");
 		if(o.via.array.size != 0) {
-			msgpack_object* p = o.via.array.ptr;
+			p = o.via.array.ptr;
 			msgpack_object_print(out, *p);
 			++p;
-			msgpack_object* const pend = o.via.array.ptr + o.via.array.size;
+			pend = o.via.array.ptr + o.via.array.size;
 			for(; p < pend; ++p) {
 				fprintf(out, ", ");
 				msgpack_object_print(out, *p);
@@ -146,17 +155,17 @@ void msgpack_object_print(FILE* out, msgpack_object o)
 	case MSGPACK_OBJECT_MAP:
 		fprintf(out, "{");
 		if(o.via.map.size != 0) {
-			msgpack_object_kv* p = o.via.map.ptr;
-			msgpack_object_print(out, p->key);
+			kv = o.via.map.ptr;
+			msgpack_object_print(out, kv->key);
 			fprintf(out, "=>");
-			msgpack_object_print(out, p->val);
-			++p;
-			msgpack_object_kv* const pend = o.via.map.ptr + o.via.map.size;
-			for(; p < pend; ++p) {
+			msgpack_object_print(out, kv->val);
+			++kv;
+			kvend = o.via.map.ptr + o.via.map.size;
+			for(; kv < kvend; ++kv) {
 				fprintf(out, ", ");
-				msgpack_object_print(out, p->key);
+				msgpack_object_print(out, kv->key);
 				fprintf(out, "=>");
-				msgpack_object_print(out, p->val);
+				msgpack_object_print(out, kv->val);
 			}
 		}
 		fprintf(out, "}");
@@ -168,13 +177,13 @@ void msgpack_object_print(FILE* out, msgpack_object o)
 	}
 }
 
-bool msgpack_object_equal(const msgpack_object x, const msgpack_object y)
+msgpack_booleantype msgpack_object_equal(const msgpack_object x, const msgpack_object y)
 {
-	if(x.type != y.type) { return false; }
+	if(x.type != y.type) { return msgpack_false; }
 
 	switch(x.type) {
 	case MSGPACK_OBJECT_NIL:
-		return true;
+		return msgpack_true;
 
 	case MSGPACK_OBJECT_BOOLEAN:
 		return x.via.boolean == y.via.boolean;
@@ -194,44 +203,44 @@ bool msgpack_object_equal(const msgpack_object x, const msgpack_object y)
 
 	case MSGPACK_OBJECT_ARRAY:
 		if(x.via.array.size != y.via.array.size) {
-			return false;
+			return msgpack_false;
 		} else if(x.via.array.size == 0) {
-			return true;
+			return msgpack_true;
 		} else {
 			msgpack_object* px = x.via.array.ptr;
 			msgpack_object* const pxend = x.via.array.ptr + x.via.array.size;
 			msgpack_object* py = y.via.array.ptr;
 			do {
 				if(!msgpack_object_equal(*px, *py)) {
-					return false;
+					return msgpack_false;
 				}
 				++px;
 				++py;
 			} while(px < pxend);
-			return true;
+			return msgpack_true;
 		}
 
 	case MSGPACK_OBJECT_MAP:
 		if(x.via.map.size != y.via.map.size) {
-			return false;
+			return msgpack_false;
 		} else if(x.via.map.size == 0) {
-			return true;
+			return msgpack_true;
 		} else {
 			msgpack_object_kv* px = x.via.map.ptr;
 			msgpack_object_kv* const pxend = x.via.map.ptr + x.via.map.size;
 			msgpack_object_kv* py = y.via.map.ptr;
 			do {
 				if(!msgpack_object_equal(px->key, py->key) || !msgpack_object_equal(px->val, py->val)) {
-					return false;
+					return msgpack_false;
 				}
 				++px;
 				++py;
 			} while(px < pxend);
-			return true;
+			return msgpack_true;
 		}
 
 	default:
-		return false;
+		return msgpack_false;
 	}
 }
 

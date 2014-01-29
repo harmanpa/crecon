@@ -62,8 +62,8 @@ typedef struct {
 	const char* ptr;
 } msgpack_object_raw;
 
-typedef union {
-	bool boolean;
+typedef struct {
+	msgpack_booleantype boolean;
 	uint64_t u64;
 	int64_t  i64;
 	double   dec;
@@ -85,7 +85,7 @@ typedef struct msgpack_object_kv {
 
 void msgpack_object_print(FILE* out, msgpack_object o);
 
-bool msgpack_object_equal(const msgpack_object x, const msgpack_object y);
+msgpack_booleantype msgpack_object_equal(const msgpack_object x, const msgpack_object y);
 
 /** @} */
 
