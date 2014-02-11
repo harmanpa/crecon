@@ -20,6 +20,7 @@ recon_status recon_wall_open(const char *filename, recon_wall* out) {
     wall->ndefinedtables = 0;
     wall->ndefinedobjects = 0;
     wall->finalized = RECON_FALSE;
+    wall->nrows = -1;
     wall->buffer = msgpack_sbuffer_new();
     wall->packer = msgpack_packer_new(wall->buffer, msgpack_sbuffer_write);
 
@@ -60,7 +61,6 @@ recon_status recon_wall_open(const char *filename, recon_wall* out) {
     free(header_data);
     wall->currentrowtable = NULL;
     wall->finalized = RECON_TRUE;
-    //todo: visit rows?
     return status;
 }
 
@@ -273,6 +273,7 @@ recon_status recon_wall_create(char* filename, int nTables, int nObjects, recon_
     wall->nfmeta = 0;
     wall->ntables = nTables;
     wall->nobjects = nObjects;
+    wall->nrows = -1;
     if (nTables > 0) {
         wall->tables = (wall_table*) malloc(nTables * sizeof (wall_table));
     }
@@ -463,4 +464,38 @@ recon_status recon_wall_pack_fixed_header(wall_file* file, uint32_t header_size)
     }
     free(header);
     return RECON_WRITE_ERROR;
+}
+
+recon_status recon_wall_visit_rows(wall_file* file) {
+    recon_status status = RECON_OK;
+    uint32_t n;
+    char* sizeindicator = (char*) malloc(4);
+    char* row_data = (char*) malloc(1);
+    status = recon_object_buffer_create(&(file->rows));
+    if (status != RECON_OK) {
+        free(sizeindicator);
+        free(row_data);
+        return status;
+    }
+    file->nrows = 0;
+    while (4 == fread(sizeindicator, 1, 4, file->fp)) {
+        n = recon_util_bytes_to_int(sizeindicator);
+        row_data = (char*) realloc(row_data, n);
+        if (n != fread(row_data, 1, n, file->fp)) {
+            free(sizeindicator);
+            free(row_data);
+            return RECON_READ_ERROR;
+        }
+        status = recon_wall_row_buffer_append(file->rows, row_data, n);
+        if (status != RECON_OK) {
+            free(sizeindicator);
+            free(row_data);
+            return status;
+        }
+        file->nrows++;
+    fprintf(stderr,"Read row %i\n", file->nrows);
+    }
+    free(row_data);
+    free(sizeindicator);
+    return RECON_OK;
 }

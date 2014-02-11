@@ -54,6 +54,9 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <cTool>
+          <architecture>2</architecture>
+        </cTool>
         <archiverTool>
         </archiverTool>
       </compileType>
@@ -112,6 +115,7 @@
       <compileType>
         <cTool>
           <developmentMode>5</developmentMode>
+          <architecture>2</architecture>
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>

@@ -27,10 +27,4 @@ int recon_util_digits(int n) {
     }
     return count;
 }
-/*
 
-void recon_ibuffer_append(recon_ibuffer* buffer, int i) {
-    
-}
-
-*/

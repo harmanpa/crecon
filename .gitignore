@@ -17,6 +17,10 @@
 *.out
 *.app
 
+/crecon/build/
+/crecon/dist/
+/crecon/test.wll
+
 #OS junk files
 [Tt]humbs.db
 *.DS_Store
