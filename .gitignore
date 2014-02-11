@@ -16,3 +16,6 @@
 *.exe
 *.out
 *.app
+/crecon/build/
+/crecon/dist/
+/crecon/test.wll
