@@ -57,3 +57,5 @@ ipch/
 
 #Test files
 *.testsettings
+/crecon/build/
+/crecon/dist/
