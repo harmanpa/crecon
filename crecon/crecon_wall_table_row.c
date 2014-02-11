@@ -408,3 +408,50 @@ recon_status recon_wall_table_get_signal_boolean(recon_wall_table tab, char* sig
     }
     return RECON_OK;
 }
+
+
+recon_status recon_wall_table_get_signal_object(recon_wall_table tab, char* signal, msgpack_object* s) {
+    recon_status status = RECON_OK;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    msgpack_object* object;
+    msgpack_object_map map;
+    msgpack_object_array array;
+    int i;
+    int n = 0;
+    int column;
+    status = recon_wall_table_find_signal(tab, signal, &column);
+    if (status != RECON_OK) {
+        return status;
+    }
+    if (file->nrows < 0) {
+        status = recon_wall_visit_rows(file);
+        if (status != RECON_OK) {
+            return status;
+        }
+    }
+    for (i = 0; i < file->nrows; i++) {
+        status = recon_wall_row_buffer_get_object(file->rows, i, &object);
+        if (status != RECON_OK) {
+            return status;
+        }
+        switch (object->type) {
+            case MSGPACK_OBJECT_MAP:
+                map = object->via.map;
+                if (memcmp(table->name, map.ptr->key.via.raw.ptr, map.ptr->key.via.raw.size) == 0) {
+                    switch (map.ptr->val.type) {
+                        case MSGPACK_OBJECT_ARRAY:
+                            array = map.ptr->val.via.array;
+                            if (column >= array.size) {
+                                return RECON_INCOMPLETE_ROW;
+                            }
+                            s[n] = array.ptr[column];
+                            n++;
+                            break;
+                    }
+                }
+                break;
+        }
+    }
+    return RECON_OK;
+}
