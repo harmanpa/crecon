@@ -44,7 +44,7 @@ typedef struct msgpack_zbuffer {
 #define MSGPACK_ZBUFFER_INIT_SIZE 8192
 #endif
 
-static inline bool msgpack_zbuffer_init(msgpack_zbuffer* zbuf,
+static inline msgpack_booleantype msgpack_zbuffer_init(msgpack_zbuffer* zbuf,
 		int level, size_t init_size);
 static inline void msgpack_zbuffer_destroy(msgpack_zbuffer* zbuf);
 
@@ -56,7 +56,7 @@ static inline char* msgpack_zbuffer_flush(msgpack_zbuffer* zbuf);
 static inline const char* msgpack_zbuffer_data(const msgpack_zbuffer* zbuf);
 static inline size_t msgpack_zbuffer_size(const msgpack_zbuffer* zbuf);
 
-static inline bool msgpack_zbuffer_reset(msgpack_zbuffer* zbuf);
+static inline msgpack_booleantype msgpack_zbuffer_reset(msgpack_zbuffer* zbuf);
 static inline void msgpack_zbuffer_reset_buffer(msgpack_zbuffer* zbuf);
 static inline char* msgpack_zbuffer_release_buffer(msgpack_zbuffer* zbuf);
 
@@ -67,10 +67,10 @@ static inline char* msgpack_zbuffer_release_buffer(msgpack_zbuffer* zbuf);
 
 static inline int msgpack_zbuffer_write(void* data, const char* buf, unsigned int len);
 
-static inline bool msgpack_zbuffer_expand(msgpack_zbuffer* zbuf);
+static inline msgpack_booleantype msgpack_zbuffer_expand(msgpack_zbuffer* zbuf);
 
 
-bool msgpack_zbuffer_init(msgpack_zbuffer* zbuf,
+msgpack_booleantype msgpack_zbuffer_init(msgpack_zbuffer* zbuf,
 		int level, size_t init_size)
 {
 	memset(zbuf, 0, sizeof(msgpack_zbuffer));
@@ -105,7 +105,7 @@ void msgpack_zbuffer_free(msgpack_zbuffer* zbuf)
 	free(zbuf);
 }
 
-bool msgpack_zbuffer_expand(msgpack_zbuffer* zbuf)
+msgpack_booleantype msgpack_zbuffer_expand(msgpack_zbuffer* zbuf)
 {
 	size_t used = (char*)zbuf->stream.next_out - zbuf->data;
 	size_t csize = used + zbuf->stream.avail_out;
@@ -178,7 +178,7 @@ void msgpack_zbuffer_reset_buffer(msgpack_zbuffer* zbuf)
 	zbuf->stream.next_out = (Bytef*)zbuf->data;
 }
 
-bool msgpack_zbuffer_reset(msgpack_zbuffer* zbuf)
+msgpack_booleantype msgpack_zbuffer_reset(msgpack_zbuffer* zbuf)
 {
 	if(deflateReset(&zbuf->stream) != Z_OK) {
 		return false;

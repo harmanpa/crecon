@@ -52,9 +52,55 @@ recon_status recon_wall_table_row_add_string(recon_wall_table tab, char* v) {
     return RECON_OK;
 }
 
+recon_status recon_wall_table_row_add_double_array(recon_wall_table tab, double *v, int nv) {
+    int i;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    if (file->currentrowwritten >= file->currentrowtablesize) {
+        return RECON_INCOMPLETE_ROW;
+    }
+    msgpack_pack_array(file->packer, nv);
+    for(i=0; i<nv; i++) {
+        msgpack_pack_double(file->packer, v[i]);
+    }
+    file->currentrowwritten++;  //Assume array is single element in row
+    return RECON_OK;
+}
+
+recon_status recon_wall_table_row_add_int_array(recon_wall_table tab, int *v, int nv) {
+    int i;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    if (file->currentrowwritten >= file->currentrowtablesize) {
+        return RECON_INCOMPLETE_ROW;
+    }
+    msgpack_pack_array(file->packer, nv);
+    for(i=0; i<nv; i++) {
+        msgpack_pack_int(file->packer, v[i]);
+    }
+    file->currentrowwritten++;  //Assume array is single element in row
+    return RECON_OK;
+}
+
+recon_status recon_wall_table_row_add_string_array(recon_wall_table tab, char **v, int nv) {
+    int i;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    if (file->currentrowwritten >= file->currentrowtablesize) {
+        return RECON_INCOMPLETE_ROW;
+    }
+    msgpack_pack_array(file->packer, nv);
+    for(i=0; i<nv; i++) {
+        msgpack_pack_raw(file->packer, strlen(v[i]));
+        msgpack_pack_raw_body(file->packer, v[i], strlen(v[i]));
+    }
+    file->currentrowwritten++;  //Assume array is single element in row
+    return RECON_OK;
+}
+
 recon_status recon_wall_table_end_row(recon_wall_table tab) {
-    uint32_t size;
-    char* bytes = (char*) malloc(4);
+    size_t size;
+    char* bytes = (char*)malloc(4);
     wall_table* table = (wall_table*) tab;
     wall_file* file = (wall_file*) table->wall;
     if (file->currentrowwritten < file->currentrowtablesize) {

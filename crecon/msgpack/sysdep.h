@@ -33,7 +33,19 @@ typedef unsigned __int64 uint64_t;
 #include <stdint.h>
 #else
 #include <stdint.h>
+#endif
+#ifdef _MSC_VER
+ typedef unsigned char msgpack_booleantype;
+#define msgpack_true 1
+#define msgpack_false 0
+#else
 #include <stdbool.h>
+#define msgpack_booleantype bool
+#define msgpack_true true
+#define msgpack_false false
+#endif
+#ifdef _MSC_VER
+#define inline
 #endif
 
 #ifdef _WIN32

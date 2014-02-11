@@ -70,7 +70,7 @@ typedef struct msgpack_vrefbuffer {
 #define MSGPACK_VREFBUFFER_CHUNK_SIZE 8192
 #endif
 
-bool msgpack_vrefbuffer_init(msgpack_vrefbuffer* vbuf,
+msgpack_booleantype msgpack_vrefbuffer_init(msgpack_vrefbuffer* vbuf,
 		size_t ref_size, size_t chunk_size);
 void msgpack_vrefbuffer_destroy(msgpack_vrefbuffer* vbuf);
 

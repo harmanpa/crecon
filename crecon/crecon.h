@@ -24,6 +24,7 @@
 #ifndef CRECON_H
 #define	CRECON_H
 #include <stdio.h>
+#include "msgpack.h"
 #define RECON_OK 0
 #define RECON_ALREADY_DEFINED -1
 #define RECON_NAME_NOT_UNIQUE -2
@@ -38,7 +39,8 @@
 #define RECON_UNDEFINED -11
 #define RECON_INCOMPLETE_ROW -12
 #define RECON_INCOMPLETE_FIELD -13
-#define RECON_BUFFER_RESIZE_ERROR -14
+#define RECON_OBJECT_DEFINITION_ERROR -14
+#define RECON_BUFFER_RESIZE_ERROR -15
 
 #ifdef	__cplusplus
 extern "C" {
@@ -49,6 +51,7 @@ extern "C" {
     typedef void* recon_wall_table;
     typedef void* recon_wall_object;
     typedef void* recon_wall_signal_pointer;
+    typedef void* recon_wall_object_mobj;
 
     /**
      * Open an existing Wall file
@@ -56,7 +59,7 @@ extern "C" {
      * @param Pointer to Wall object
      * @return Status
      */
-    recon_status recon_wall_open(char*, recon_wall*);
+    recon_status recon_wall_open(const char*, recon_wall*);
     
     /**
      * Create a new Wall file
@@ -214,6 +217,30 @@ extern "C" {
      * @param The value to be written
      */
     recon_status recon_wall_table_row_add_string(recon_wall_table, char*);
+    
+    /**
+     * Append a double array to the current row
+     * @param The table to be written to
+     * @param The value to be written
+     * @param The number of values in the array
+     */
+    recon_status recon_wall_table_row_add_double_array(recon_wall_table, double*, int);
+    
+    /**
+     * Append an int array to the current row
+     * @param The table to be written to
+     * @param The value to be written
+     * @param The number of values in the array
+     */
+    recon_status recon_wall_table_row_add_int_array(recon_wall_table, int*, int);
+    
+    /**
+     * Append a string array to the current row
+     * @param The table to be written to
+     * @param The value to be written
+     * @param The number of values in the array
+     */
+    recon_status recon_wall_table_row_add_string_array(recon_wall_table, char**, int);
 
     /**
      * Close the current row
@@ -241,9 +268,21 @@ extern "C" {
     recon_status recon_wall_get_object(recon_wall,int,recon_wall_object*);
     recon_status recon_wall_find_object(recon_wall,const char*,recon_wall_object*);
     
+    recon_status recon_wall_start_field_entry(recon_wall_object obj);
     recon_status recon_wall_object_add_field_string(recon_wall_object, const char*, const char*);
     recon_status recon_wall_object_add_field_double(recon_wall_object, const char*, double);
     recon_status recon_wall_object_add_field_int(recon_wall_object, const char*, int);
+    recon_status recon_wall_object_add_field_object(recon_wall_object, const char*, void*);
+    recon_status recon_wall_end_field_entry(recon_wall_object obj);
+    
+    /* Helper methods for generation of object field entries in msgpack form */
+    recon_status recon_wall_object_new_mobj(recon_wall_object_mobj *mobj);
+    recon_status recon_wall_object_finish_mobj(recon_wall_object_mobj mobj);
+    recon_status recon_wall_object_free_mobj(recon_wall_object_mobj mobj);
+    recon_status recon_wall_object_get_mobj_packer(recon_wall_object_mobj mobj, msgpack_packer **pack);
+    recon_status recon_wall_object_get_mobj_buffer(recon_wall_object_mobj mobj, msgpack_sbuffer **buff);
+    recon_status recon_wall_object_get_mobj_data(recon_wall_object_mobj mobj, msgpack_object **data);
+    recon_status recon_wall_object_print_mobj(recon_wall_object_mobj mobj);
 
     // TRANSFORMATIONS
 

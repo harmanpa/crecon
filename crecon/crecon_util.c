@@ -1,6 +1,6 @@
 #include "crecon_impl.h"
 
-uint32_t recon_util_bytes_to_int(char* bytes) {
+uint32_t recon_util_bytes_to_int(unsigned char* bytes) {
     return (((uint32_t) bytes[0]) << 24) + (((uint32_t) bytes[1]) << 16) + (((uint32_t) bytes[2]) << 8) + (uint32_t) bytes[3];
 }
 

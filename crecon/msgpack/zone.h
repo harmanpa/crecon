@@ -61,7 +61,7 @@ typedef struct msgpack_zone {
 #define MSGPACK_ZONE_CHUNK_SIZE 8192
 #endif
 
-bool msgpack_zone_init(msgpack_zone* zone, size_t chunk_size);
+msgpack_booleantype msgpack_zone_init(msgpack_zone* zone, size_t chunk_size);
 void msgpack_zone_destroy(msgpack_zone* zone);
 
 msgpack_zone* msgpack_zone_new(size_t chunk_size);
@@ -70,12 +70,12 @@ void msgpack_zone_free(msgpack_zone* zone);
 static inline void* msgpack_zone_malloc(msgpack_zone* zone, size_t size);
 static inline void* msgpack_zone_malloc_no_align(msgpack_zone* zone, size_t size);
 
-static inline bool msgpack_zone_push_finalizer(msgpack_zone* zone,
+static inline msgpack_booleantype msgpack_zone_push_finalizer(msgpack_zone* zone,
 		void (*func)(void* data), void* data);
 
 static inline void msgpack_zone_swap(msgpack_zone* a, msgpack_zone* b);
 
-bool msgpack_zone_is_empty(msgpack_zone* zone);
+msgpack_booleantype msgpack_zone_is_empty(msgpack_zone* zone);
 
 void msgpack_zone_clear(msgpack_zone* zone);
 
@@ -90,13 +90,14 @@ void* msgpack_zone_malloc_expand(msgpack_zone* zone, size_t size);
 
 void* msgpack_zone_malloc_no_align(msgpack_zone* zone, size_t size)
 {
+	char* ptr;
 	msgpack_zone_chunk_list* cl = &zone->chunk_list;
 
 	if(zone->chunk_list.free < size) {
 		return msgpack_zone_malloc_expand(zone, size);
 	}
 
-	char* ptr = cl->ptr;
+	ptr = cl->ptr;
 	cl->free -= size;
 	cl->ptr  += size;
 
@@ -110,10 +111,10 @@ static inline void* msgpack_zone_malloc(msgpack_zone* zone, size_t size)
 }
 
 
-bool msgpack_zone_push_finalizer_expand(msgpack_zone* zone,
+msgpack_booleantype msgpack_zone_push_finalizer_expand(msgpack_zone* zone,
 		void (*func)(void* data), void* data);
 
-static inline bool msgpack_zone_push_finalizer(msgpack_zone* zone,
+static inline msgpack_booleantype msgpack_zone_push_finalizer(msgpack_zone* zone,
 		void (*func)(void* data), void* data)
 {
 	msgpack_zone_finalizer_array* const fa = &zone->finalizer_array;
@@ -128,7 +129,7 @@ static inline bool msgpack_zone_push_finalizer(msgpack_zone* zone,
 
 	++fa->tail;
 
-	return true;
+	return msgpack_true;
 }
 
 static inline void msgpack_zone_swap(msgpack_zone* a, msgpack_zone* b)
