@@ -308,12 +308,11 @@ recon_status recon_wall_close(recon_wall wall) {
         recon_wall_free_table(&(file->tables[i]));
     }
     free(file->tables);
-    /*
-        for (i = 0; i < file->ndefinedobjects; i++) {
-            recon_wall_free_object(file->objects[i]);
-        }
-        free(file->objects);
-     */
+
+    for (i = 0; i < file->ndefinedobjects; i++) {
+        recon_wall_free_object(&(file->objects[i]));
+    }
+    free(file->objects);
     free(wall);
     return RECON_OK;
 }

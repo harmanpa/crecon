@@ -274,7 +274,24 @@ extern "C" {
     recon_status recon_wall_object_add_field_object(recon_wall_object, const char*, void*);
     recon_status recon_wall_end_field_entry(recon_wall_object obj);
     
-    /* Helper methods for generation of object field entries in msgpack form */
+    /* Helper methods for generation of object field entries in msgpack object form. Used 
+     * in conjunction with direct calls to msgpack_pack functions.
+     * Example form (for existing recon_wall_objet obj):
+     * 
+     * recon_wall_object_mobj *m_obj;
+     * msgpack_packer *packer;
+     * msgpack_sbuffer *buffer;
+     * recon_wall_object_new_mobj(&m_obj);
+     * recon_wall_object_get_mobj_packer(m_obj, &packer);
+     * recon_wall_object_get_mobj_buffer(m_obj, &buffer);
+     * msgpack_pack_raw(packer, ...);
+     * ....
+     * msgpack_pack_map(packer,...);
+     * ...
+     * recon_wall_object_finish_mobj(m_obj);
+     * recon_wall_object_add_field_object(obj, "name", m_obj);
+     * 
+     */
     recon_status recon_wall_object_new_mobj(recon_wall_object_mobj *mobj);
     recon_status recon_wall_object_finish_mobj(recon_wall_object_mobj mobj);
     recon_status recon_wall_object_free_mobj(recon_wall_object_mobj mobj);
