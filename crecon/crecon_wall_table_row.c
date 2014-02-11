@@ -253,8 +253,152 @@ recon_status recon_wall_table_get_signal_double(recon_wall_table tab, char* sign
                 if (memcmp(table->name, map.ptr->key.via.raw.ptr, map.ptr->key.via.raw.size) == 0) {
                     switch (map.ptr->val.type) {
                         case MSGPACK_OBJECT_ARRAY:
-                            array = map.ptr->val.via.array;                            
-                            s[n] = array.ptr[0].via.dec;
+                            array = map.ptr->val.via.array;
+                            if (column >= array.size) {
+                                return RECON_INCOMPLETE_ROW;
+                            }
+                            switch (array.ptr[column].type) {
+                                case MSGPACK_OBJECT_DOUBLE:
+                                    s[n] = array.ptr[column].via.dec;
+                                    break;
+                                case MSGPACK_OBJECT_POSITIVE_INTEGER:
+                                    s[n] = 1.0 * array.ptr[column].via.u64;
+                                    break;
+                                case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+                                    s[n] = 1.0 * array.ptr[column].via.i64;
+                                    break;
+                                case MSGPACK_OBJECT_BOOLEAN:
+                                    s[n] = array.ptr[column].via.boolean ? 1.0 : 0.0;
+                                    break;
+                                default:
+                                    s[n] = 0.0;
+                            }
+                            n++;
+                            break;
+                    }
+                }
+                break;
+        }
+    }
+    return RECON_OK;
+}
+
+
+recon_status recon_wall_table_get_signal_integer(recon_wall_table tab, char* signal, int* s) {
+    recon_status status = RECON_OK;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    msgpack_object* object;
+    msgpack_object_map map;
+    msgpack_object_array array;
+    int i;
+    int n = 0;
+    int column;
+    status = recon_wall_table_find_signal(tab, signal, &column);
+    if (status != RECON_OK) {
+        return status;
+    }
+    if (file->nrows < 0) {
+        status = recon_wall_visit_rows(file);
+        if (status != RECON_OK) {
+            return status;
+        }
+    }
+    for (i = 0; i < file->nrows; i++) {
+        status = recon_wall_row_buffer_get_object(file->rows, i, &object);
+        if (status != RECON_OK) {
+            return status;
+        }
+        switch (object->type) {
+            case MSGPACK_OBJECT_MAP:
+                map = object->via.map;
+                if (memcmp(table->name, map.ptr->key.via.raw.ptr, map.ptr->key.via.raw.size) == 0) {
+                    switch (map.ptr->val.type) {
+                        case MSGPACK_OBJECT_ARRAY:
+                            array = map.ptr->val.via.array;
+                            if (column >= array.size) {
+                                return RECON_INCOMPLETE_ROW;
+                            }
+                            switch (array.ptr[column].type) {
+                                case MSGPACK_OBJECT_POSITIVE_INTEGER:
+                                    s[n] = (int)array.ptr[column].via.u64;
+                                    break;
+                                case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+                                    s[n] = (int)array.ptr[column].via.i64;
+                                    break;
+                                case MSGPACK_OBJECT_BOOLEAN:
+                                    s[n] = array.ptr[column].via.boolean ? 1 : 0;
+                                    break;
+                                default:
+                                    s[n] = 0;
+                            }
+                            n++;
+                            break;
+                    }
+                }
+                break;
+        }
+    }
+    return RECON_OK;
+}
+
+
+recon_status recon_wall_table_get_signal_boolean(recon_wall_table tab, char* signal, recon_booleantype* s) {
+    recon_status status = RECON_OK;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    msgpack_object* object;
+    msgpack_object_map map;
+    msgpack_object_array array;
+    int i;
+    int n = 0;
+    int column;
+    status = recon_wall_table_find_signal(tab, signal, &column);
+    if (status != RECON_OK) {
+        return status;
+    }
+    if (file->nrows < 0) {
+        status = recon_wall_visit_rows(file);
+        if (status != RECON_OK) {
+            return status;
+        }
+    }
+    for (i = 0; i < file->nrows; i++) {
+        status = recon_wall_row_buffer_get_object(file->rows, i, &object);
+        if (status != RECON_OK) {
+            return status;
+        }
+        switch (object->type) {
+            case MSGPACK_OBJECT_MAP:
+                map = object->via.map;
+                if (memcmp(table->name, map.ptr->key.via.raw.ptr, map.ptr->key.via.raw.size) == 0) {
+                    switch (map.ptr->val.type) {
+                        case MSGPACK_OBJECT_ARRAY:
+                            array = map.ptr->val.via.array;
+                            if (column >= array.size) {
+                                return RECON_INCOMPLETE_ROW;
+                            }
+                            switch (array.ptr[column].type) {
+                                case MSGPACK_OBJECT_POSITIVE_INTEGER:
+                                    if(array.ptr[column].via.u64>0) {
+                                        s[n] = RECON_TRUE;
+                                    } else {
+                                        s[n] = RECON_FALSE;
+                                    }
+                                    break;
+                                case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+                                    s[n] = RECON_FALSE;
+                                    break;
+                                case MSGPACK_OBJECT_BOOLEAN:
+                                    if(array.ptr[column].via.boolean) {
+                                        s[n] = RECON_TRUE;
+                                    } else {
+                                        s[n] = RECON_FALSE;
+                                    }
+                                    break;
+                                default:
+                                    s[n] = RECON_FALSE;
+                            }
                             n++;
                             break;
                     }
