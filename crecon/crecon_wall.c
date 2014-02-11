@@ -1,6 +1,6 @@
 #include "crecon_impl.h"
 
-recon_status recon_wall_open(char *filename, recon_wall* out) {
+recon_status recon_wall_open(const char *filename, recon_wall* out) {
     wall_file* wall;
     msgpack_object_kv* p;
     msgpack_object_kv* pend;

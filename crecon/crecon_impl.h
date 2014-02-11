@@ -6,7 +6,6 @@ typedef unsigned char recon_booleantype;
 #define RECON_FALSE 0;
 #define RECON_TRUE 1;
 #include "crecon.h"
-#include "msgpack.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -32,9 +31,18 @@ extern "C" {
 		int nrows;
 	} wall_table;
 
+        typedef struct {
+                msgpack_sbuffer* buffer;
+		msgpack_packer* packer;
+                msgpack_unpacked* msg;
+                recon_booleantype finalized;
+        } wall_object_mobj;
+
+        
 	typedef struct {
 		char* name;
-		char* field;
+		void* field;
+                recon_booleantype fieldischar;
 	} wall_field;
 
 	typedef struct {
@@ -79,7 +87,7 @@ extern "C" {
 	* @param 
 	* @return 
 	*/
-	uint32_t recon_util_bytes_to_int(char*);
+	uint32_t recon_util_bytes_to_int(unsigned char*);
 
 	/**
 	* 
@@ -103,9 +111,9 @@ extern "C" {
 
 	recon_status recon_wall_object_find_field(recon_wall_object , const char* , int* );
 
-	recon_status recon_wall_object_update_field_value(recon_wall_object, int, const char*);
+	recon_status recon_wall_object_update_field_value(recon_wall_object, int, void*, recon_booleantype);
 
-	recon_status recon_wall_add_field(recon_wall_object , const char* , const char* );
+	recon_status recon_wall_add_field(recon_wall_object obj, const char*, void*, recon_booleantype);
 
 	recon_status recon_wall_unpack_fixed_header(wall_file* , uint32_t* );
 
