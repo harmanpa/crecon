@@ -18,6 +18,12 @@ extern "C" {
     static char* __recon_size_placeholder = "XXXX";
 
     typedef struct {
+        size_t size;
+	msgpack_object* data;
+	size_t alloc;
+    } recon_object_buffer;
+    
+    typedef struct {
         recon_wall wall;
         char* name;
         int nsignals;
@@ -71,6 +77,9 @@ extern "C" {
         //Field writing variables
         wall_object* currentfield;
         size_t positionatfieldstart;
+        // Row reading variables
+        int nrows;
+        recon_object_buffer* rows;
     } wall_file;
     
     /**

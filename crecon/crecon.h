@@ -38,6 +38,7 @@
 #define RECON_UNDEFINED -11
 #define RECON_INCOMPLETE_ROW -12
 #define RECON_INCOMPLETE_FIELD -13
+#define RECON_BUFFER_RESIZE_ERROR -14
 
 #ifdef	__cplusplus
 extern "C" {

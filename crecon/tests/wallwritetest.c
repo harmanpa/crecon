@@ -29,6 +29,7 @@ void test1() {
     int nsignals = 100;
     int naliases = nsignals;
     int nrows = 100000;
+    int nrows2;
     int nflush = 100;
     int nobjects = 1;
     int nfields = 10;
@@ -158,6 +159,13 @@ void test1() {
         free(signalnamegot);
         free(aliasnamegot);
     }
+
+    status = recon_wall_table_count_rows(table2, &nrows2);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed counting rows\n");
+        return;
+    }
+    
     status = recon_wall_find_object(wall2, "object1", &object2);
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed to find object\n");

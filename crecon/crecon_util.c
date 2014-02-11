@@ -27,10 +27,48 @@ int recon_util_digits(int n) {
     }
     return count;
 }
-/*
 
-void recon_ibuffer_append(recon_ibuffer* buffer, int i) {
-    
+#define RECON_OBJECT_BUFFER_SIZE 100
+
+recon_status recon_object_buffer_create(recon_object_buffer** buffer) {
+    *buffer = (recon_object_buffer*) malloc(sizeof (recon_object_buffer*));
+    (*buffer)->data = (msgpack_object*) malloc(RECON_OBJECT_BUFFER_SIZE * sizeof (msgpack_object));
+    (*buffer)->alloc = RECON_OBJECT_BUFFER_SIZE;
+    (*buffer)->size = 0;
+    return RECON_OK;
 }
 
-*/
+recon_status recon_object_buffer_size(recon_object_buffer* buffer, int* size) {
+    *size = buffer->size;
+    return RECON_OK;
+}
+
+recon_status recon_object_buffer_get(recon_object_buffer* buffer, int i, msgpack_object* obj) {
+    if (i < 0 || i >= buffer->size) {
+        return RECON_NOT_FOUND;
+    }
+    msgpack_object_print(stderr, buffer->data[i]);
+    *obj = buffer->data[i];
+    return RECON_OK;
+}
+
+recon_status recon_object_buffer_append(recon_object_buffer* buffer, msgpack_object object) {
+    if (buffer->alloc - buffer->size < 1) {
+        size_t nsize = (buffer->alloc) ? buffer->alloc * 2 : RECON_OBJECT_BUFFER_SIZE;
+        void* tmp = realloc(buffer->data, nsize);
+        if (!tmp) {
+            return RECON_BUFFER_RESIZE_ERROR;
+        }
+        buffer->data = (msgpack_object*) tmp;
+        buffer->alloc = nsize;
+    }
+    memcpy(buffer->data+buffer->size, &object, sizeof(msgpack_object));
+//    buffer->data[buffer->size] = object;
+    buffer->size++;
+    return RECON_OK;
+}
+
+recon_status recon_object_buffer_destroy(recon_object_buffer* buffer) {
+    free(buffer->data);
+    return RECON_OK;
+}

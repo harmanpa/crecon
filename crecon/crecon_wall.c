@@ -17,6 +17,7 @@ recon_status recon_wall_open(char *filename, recon_wall* out) {
     wall->ndefinedtables = 0;
     wall->ndefinedobjects = 0;
     wall->finalized = RECON_FALSE;
+    wall->nrows = -1;
     wall->buffer = msgpack_sbuffer_new();
     wall->packer = msgpack_packer_new(wall->buffer, msgpack_sbuffer_write);
     wall->packer = msgpack_packer_new(wall->buffer, msgpack_sbuffer_write);
@@ -57,7 +58,6 @@ recon_status recon_wall_open(char *filename, recon_wall* out) {
     msgpack_unpacked_destroy(header);
     free(header);
     wall->finalized = RECON_TRUE;
-    //todo: visit rows?
     return status;
 }
 
@@ -267,6 +267,7 @@ recon_status recon_wall_create(char* filename, int nTables, int nObjects, recon_
     wall->nfmeta = 0;
     wall->ntables = nTables;
     wall->nobjects = nObjects;
+    wall->nrows = -1;
     if (nTables > 0) {
         wall->tables = (wall_table*) malloc(nTables * sizeof (wall_table));
     }
@@ -302,12 +303,12 @@ recon_status recon_wall_close(recon_wall wall) {
         recon_wall_free_table(file->tables[i]);
     }
     free(file->tables);
-/*
-    for (i = 0; i < file->ndefinedobjects; i++) {
-        recon_wall_free_object(file->objects[i]);
-    }
-    free(file->objects);
-*/
+    /*
+        for (i = 0; i < file->ndefinedobjects; i++) {
+            recon_wall_free_object(file->objects[i]);
+        }
+        free(file->objects);
+     */
     free(wall);
     return RECON_OK;
 }
@@ -458,4 +459,46 @@ recon_status recon_wall_pack_fixed_header(wall_file* file, uint32_t header_size)
     }
     free(header);
     return RECON_WRITE_ERROR;
+}
+
+recon_status recon_wall_visit_rows(wall_file* file) {
+    recon_status status = RECON_OK;
+    uint32_t n;
+    char* sizeindicator = (char*) malloc(4);
+    char* row_data = (char*) malloc(1);
+    msgpack_unpacked* row_unpacked = (msgpack_unpacked*) malloc(sizeof (msgpack_unpacked));
+    status = recon_object_buffer_create(&(file->rows));
+    if (status != RECON_OK) {
+        free(row_unpacked);
+        free(sizeindicator);
+        free(row_data);
+        return status;
+    }
+    file->nrows = 0;
+    while (4 == fread(sizeindicator, 1, 4, file->fp)) {
+        n = recon_util_bytes_to_int(sizeindicator);
+        row_data = (char*) realloc(row_data, n);
+        if (n != fread(row_data, 1, n, file->fp)) {
+            free(row_unpacked);
+            free(sizeindicator);
+            free(row_data);
+            return RECON_READ_ERROR;
+        }
+        msgpack_unpacked_init(row_unpacked);
+        msgpack_unpack_next(row_unpacked, row_data, n, NULL);
+        status = recon_object_buffer_append(file->rows, row_unpacked->data);
+        if (status != RECON_OK) {
+            msgpack_unpacked_destroy(row_unpacked);
+            free(row_unpacked);
+            free(sizeindicator);
+            free(row_data);
+            return status;
+        }
+        file->nrows++;
+        msgpack_unpacked_destroy(row_unpacked);
+    }
+    free(row_unpacked);
+    free(row_data);
+    free(sizeindicator);
+    return RECON_OK;
 }
