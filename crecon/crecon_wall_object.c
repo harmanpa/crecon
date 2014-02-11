@@ -161,12 +161,12 @@ recon_status recon_wall_object_update_fields(recon_wall_object obj) {
     object = (wall_object*) obj;
     for (i = 0; i < object->nbufferedfields; i++) {
         if (recon_wall_object_find_field(obj, object->bufferedfields[i].name, &j) == RECON_OK) {
-            status = recon_wall_object_update_field_value(obj, j, object->bufferedfields[i].field);
+            status = recon_wall_object_update_field_value(obj, j, object->bufferedfields[i].field, object->bufferedfields[i].fieldischar);
             if (status != RECON_OK) {
                 return status;
             }
         } else {
-            status = recon_wall_add_field(obj, object->bufferedfields[i].name, object->bufferedfields[i].field);
+            status = recon_wall_add_field(obj, object->bufferedfields[i].name, object->bufferedfields[i].field, object->bufferedfields[i].fieldischar);
             if (status != RECON_OK) {
                 return status;
             }
@@ -175,7 +175,7 @@ recon_status recon_wall_object_update_fields(recon_wall_object obj) {
     return RECON_OK;
 }
 
-recon_status recon_wall_add_field(recon_wall_object obj, const char* name, const char* value) {
+recon_status recon_wall_add_field(recon_wall_object obj, const char* name, void* value, recon_booleantype isChar) {
     wall_object* object;
     object = (wall_object*) obj;
     if (object->ndefinedfields >= object->sizefields - 1) {
@@ -188,7 +188,7 @@ recon_status recon_wall_add_field(recon_wall_object obj, const char* name, const
     return RECON_OK;
 }
 
-recon_status recon_wall_object_update_field_value(recon_wall_object obj, int i, const char* value) {
+recon_status recon_wall_object_update_field_value(recon_wall_object obj, int i, void* value, recon_booleantype isChar) {
     wall_object* object;
     object = (wall_object*) obj;
     if (i >= object->ndefinedfields) {

@@ -28,47 +28,57 @@ int recon_util_digits(int n) {
     return count;
 }
 
-#define RECON_OBJECT_BUFFER_SIZE 100
-
-recon_status recon_object_buffer_create(recon_object_buffer** buffer) {
-    *buffer = (recon_object_buffer*) malloc(sizeof (recon_object_buffer*));
-    (*buffer)->data = (msgpack_object*) malloc(RECON_OBJECT_BUFFER_SIZE * sizeof (msgpack_object));
-    (*buffer)->alloc = RECON_OBJECT_BUFFER_SIZE;
-    (*buffer)->size = 0;
-    return RECON_OK;
+msgpack_object get_array_element(msgpack_object_array array, int i) {
+    return array.ptr[i];
 }
 
-recon_status recon_object_buffer_size(recon_object_buffer* buffer, int* size) {
-    *size = buffer->size;
-    return RECON_OK;
-}
-
-recon_status recon_object_buffer_get(recon_object_buffer* buffer, int i, msgpack_object* obj) {
-    if (i < 0 || i >= buffer->size) {
-        return RECON_NOT_FOUND;
+double as_double(msgpack_object object) {
+    switch (object.type) {
+        case MSGPACK_OBJECT_DOUBLE:
+            return object.via.dec;
+        case MSGPACK_OBJECT_POSITIVE_INTEGER:
+            return (double) object.via.u64;
+        case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+            return (double) object.via.i64;
+        case MSGPACK_OBJECT_BOOLEAN:
+            return object.via.boolean ? 1.0 : 0.0;
     }
-    msgpack_object_print(stderr, buffer->data[i]);
-    *obj = buffer->data[i];
-    return RECON_OK;
+    return 0.0;
 }
 
-recon_status recon_object_buffer_append(recon_object_buffer* buffer, msgpack_object object) {
-    if (buffer->alloc - buffer->size < 1) {
-        size_t nsize = (buffer->alloc) ? buffer->alloc * 2 : RECON_OBJECT_BUFFER_SIZE;
-        void* tmp = realloc(buffer->data, nsize);
-        if (!tmp) {
-            return RECON_BUFFER_RESIZE_ERROR;
-        }
-        buffer->data = (msgpack_object*) tmp;
-        buffer->alloc = nsize;
+int as_int(msgpack_object object) {
+    switch (object.type) {
+        case MSGPACK_OBJECT_POSITIVE_INTEGER:
+            return (int) object.via.u64;
+        case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+            return (int) object.via.i64;
+        case MSGPACK_OBJECT_BOOLEAN:
+            return object.via.boolean ? 1 : 0;
     }
-    memcpy(buffer->data+buffer->size, &object, sizeof(msgpack_object));
-//    buffer->data[buffer->size] = object;
-    buffer->size++;
-    return RECON_OK;
+    return 0;
 }
 
-recon_status recon_object_buffer_destroy(recon_object_buffer* buffer) {
-    free(buffer->data);
-    return RECON_OK;
+recon_booleantype as_boolean(msgpack_object object) {
+    switch (object.type) {
+        case MSGPACK_OBJECT_POSITIVE_INTEGER:
+            if (object.via.u64 > 0) {
+                return RECON_TRUE;
+            } else {
+                return RECON_FALSE;
+            }
+        case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+            if (object.via.i64 > 0) {
+                return RECON_TRUE;
+            } else {
+                return RECON_FALSE;
+            }
+        case MSGPACK_OBJECT_BOOLEAN:
+            if (object.via.boolean) {
+                return RECON_TRUE;
+            } else {
+                return RECON_FALSE;
+            }
+    }
+    return RECON_FALSE;
 }
+
