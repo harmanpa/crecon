@@ -59,3 +59,5 @@ ipch/
 *.testsettings
 /crecon/build/
 /crecon/dist/
+
+[Nn]bproject/
