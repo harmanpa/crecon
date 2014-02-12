@@ -42,10 +42,10 @@ extern "C" {
 	typedef struct {
 		msgpack_sbuffer* buffer;
 		msgpack_packer* packer;
-		msgpack_unpacked* msg;
-		recon_booleantype finalized;
-	} wall_object_mobj;
-
+                msgpack_unpacked* msg;
+                msgpack_object* data;
+                recon_booleantype finalized;
+        } wall_object_mobj;
 
 	typedef struct {
 		char* name;

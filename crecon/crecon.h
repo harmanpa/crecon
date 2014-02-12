@@ -54,6 +54,7 @@ extern "C" {
     typedef void* recon_wall_table;
     typedef void* recon_wall_object;
     typedef void* recon_wall_signal_pointer;
+    typedef void* recon_wall_object_field;
     typedef void* recon_wall_object_mobj;
 
     /**
@@ -312,6 +313,9 @@ extern "C" {
     recon_status recon_wall_object_get_mobj_buffer(recon_wall_object_mobj mobj, msgpack_sbuffer **buff);
     recon_status recon_wall_object_get_mobj_data(recon_wall_object_mobj mobj, msgpack_object **data);
     recon_status recon_wall_object_print_mobj(recon_wall_object_mobj mobj);
+    
+    /* Read fields from buffer into object*/
+    recon_status recon_wall_object_get_fields(recon_wall_object obj);
 
     // TRANSFORMATIONS
 
