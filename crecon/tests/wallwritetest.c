@@ -126,7 +126,7 @@ recon_status test1_read_myobj(recon_wall_object object) {
     if (!isstring) {
         status = recon_wall_object_parse_field_value_elements(field, &elems, &noelements); if (status != RECON_OK) { return status; }
         for (i = 0; i < noelements; i++) {
-            status = recon_wall_object_get_field_value_element(elems, i, &fieldname, &fieldarray, &len_array);
+            status = recon_wall_object_get_field_value_element(elems, i, &fieldname, &fieldarray, &len_array); if (status != RECON_OK) { return status; }
             printf("name: %s\n", fieldname);
             printf("value: %s", fieldarray[0]);
             for (j = 1; j < len_array; j++) {
