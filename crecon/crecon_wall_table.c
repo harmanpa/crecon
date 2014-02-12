@@ -90,6 +90,19 @@ recon_status recon_wall_table_find_signal(recon_wall_table tab, const char* name
     return RECON_NOT_FOUND;
 }
 
+recon_status recon_wall_table_find_alias(recon_wall_table tab, const char* name, char** of, char** transform) {
+    int i;
+    wall_table* table = (wall_table*) tab;
+    for (i = 0; i < table->ndefinedaliases; i++) {
+        if (strcmp(name, table->aliases[i]) == 0) {
+            *of = table->aliased[i];
+			*transform = table->transforms[i];
+            return RECON_OK;
+        }
+    }
+    return RECON_NOT_FOUND;
+}
+
 recon_status recon_wall_table_get_signal(recon_wall_table tab, int index, char** name) {
     wall_table* table = (wall_table*) tab;
     if (index < 0 || index >= table->ndefinedsignals) {
@@ -140,7 +153,7 @@ recon_status recon_wall_get_table(recon_wall wall, int n, recon_wall_table* out)
     if (n < 0 || n >= file->ndefinedtables) {
         return RECON_UNDEFINED;
     }
-    *out = (recon_wall_table*) &(file->tables[n]);
+    *out = (recon_wall_table) &(file->tables[n]);
     return RECON_OK;
 }
 
@@ -149,10 +162,28 @@ recon_status recon_wall_find_table(recon_wall wall, const char* name, recon_wall
     wall_file* file = (wall_file*) wall;
     for (i = 0; i < file->ndefinedtables; i++) {
         if (strcmp(name, file->tables[i].name) == 0) {
-            *out = (recon_wall_table*) &(file->tables[i]);
+            *out = (recon_wall_table) &(file->tables[i]);
             return RECON_OK;
         }
     }
     return RECON_NOT_FOUND;
 }
 
+recon_status recon_wall_find_table_for_signal(recon_wall wall, const char* signalname, recon_wall_table* out) {
+	int i;
+	int index;
+	char* aliased;
+	char* transform;
+    wall_file* file = (wall_file*) wall;
+    for (i = 0; i < file->ndefinedtables; i++) {
+		if(RECON_OK == recon_wall_table_find_signal((recon_wall_table)&(file->tables[i]), signalname, &index)) {
+            *out = (recon_wall_table) &(file->tables[i]);
+            return RECON_OK;
+        }
+		if(RECON_OK == recon_wall_table_find_alias((recon_wall_table)&(file->tables[i]), signalname, &aliased, &transform)) {
+			*out = (recon_wall_table) &(file->tables[i]);
+            return RECON_OK;
+		}
+    }
+    return RECON_NOT_FOUND;
+}

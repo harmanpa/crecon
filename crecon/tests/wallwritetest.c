@@ -141,6 +141,7 @@ void test1() {
             return;
         }
         status = recon_transform_create_affine(&transform, -1.0, (double) i);
+		//status = recon_transform_create_inverse(&transform);
         status = recon_wall_table_add_alias(table, aliasname, signalname, transform);
         free(signalname);
         free(aliasname);
@@ -273,6 +274,15 @@ void test1() {
         fprintf(stderr, "%f,", signal[i]);
     }
 
+	status = recon_wall_table_get_signal_double(table2, "1elbairav", signal);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed reading signal\n");
+        return;
+    }
+    for (i = 0; i < nrows2; i++) {
+        fprintf(stderr, "%f,", signal[i]);
+    }
+
     status = recon_wall_find_object(wall2, "object1", &object2);
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed to find object\n");
@@ -302,7 +312,7 @@ void test1() {
 
 void test2() {
     uint32_t i;
-    char* a = (char*) malloc(8);
+    unsigned char* a = (unsigned char*) malloc(8);
     recon_util_int_to_bytes(22, a + 4);
     i = recon_util_bytes_to_int(a + 4);
     if (i != 22) {

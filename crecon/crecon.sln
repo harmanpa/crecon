@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crecon", "crecon.vcxproj", "{6DD89E18-1584-42CC-82ED-2C829D0B7E59}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crecon_test", "..\crecon_test\crecon_test.vcxproj", "{E6D7EE67-80A1-4C9A-A20F-DE140EA48AA8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6DD89E18-1584-42CC-82ED-2C829D0B7E59} = {6DD89E18-1584-42CC-82ED-2C829D0B7E59}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,6 +24,14 @@ Global
 		{6DD89E18-1584-42CC-82ED-2C829D0B7E59}.Release|Win32.Build.0 = Release|Win32
 		{6DD89E18-1584-42CC-82ED-2C829D0B7E59}.Release|x64.ActiveCfg = Release|x64
 		{6DD89E18-1584-42CC-82ED-2C829D0B7E59}.Release|x64.Build.0 = Release|x64
+		{E6D7EE67-80A1-4C9A-A20F-DE140EA48AA8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E6D7EE67-80A1-4C9A-A20F-DE140EA48AA8}.Debug|Win32.Build.0 = Debug|Win32
+		{E6D7EE67-80A1-4C9A-A20F-DE140EA48AA8}.Debug|x64.ActiveCfg = Debug|x64
+		{E6D7EE67-80A1-4C9A-A20F-DE140EA48AA8}.Debug|x64.Build.0 = Debug|x64
+		{E6D7EE67-80A1-4C9A-A20F-DE140EA48AA8}.Release|Win32.ActiveCfg = Release|Win32
+		{E6D7EE67-80A1-4C9A-A20F-DE140EA48AA8}.Release|Win32.Build.0 = Release|Win32
+		{E6D7EE67-80A1-4C9A-A20F-DE140EA48AA8}.Release|x64.ActiveCfg = Release|x64
+		{E6D7EE67-80A1-4C9A-A20F-DE140EA48AA8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
