@@ -41,6 +41,12 @@ extern "C" {
 		char** transforms;
 		int nrows;
 	} wall_table;
+        
+        typedef struct {
+            char *name;
+            char **values;
+            int novalues;
+        } wall_field_element;
 
         typedef struct {
                 msgpack_sbuffer* buffer;

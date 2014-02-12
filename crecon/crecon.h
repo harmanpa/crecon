@@ -41,6 +41,8 @@
 #define RECON_INCOMPLETE_FIELD -13
 #define RECON_OBJECT_DEFINITION_ERROR -14
 #define RECON_BUFFER_RESIZE_ERROR -15
+#define RECON_SCALAR_FIELD_VALUE -16
+#define RECON_FIELD_DESERIALIZATION_ERROR -17
 
 #ifdef	__cplusplus
 extern "C" {
@@ -53,6 +55,7 @@ extern "C" {
     typedef void* recon_wall_signal_pointer;
     typedef void* recon_wall_object_field;
     typedef void* recon_wall_object_mobj;
+    typedef void* recon_wall_object_field_element;
 
     /**
      * Open an existing Wall file

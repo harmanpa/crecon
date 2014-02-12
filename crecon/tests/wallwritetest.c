@@ -85,21 +85,64 @@ recon_status test1_write_mobj_field(recon_wall_object object) {
 }
 
 recon_status test1_read_myobj(recon_wall_object object) {
-    int fieldindex = -1;
+    int fieldindex = -1, noelements = 0, i = 0, j = 0, len_array = 0;
     comp_object myobj;
     recon_booleantype isstring;
     recon_wall_object_mobj msgobj;
     recon_wall_object_field field;
+    recon_wall_object_field_element elems;
+    char *fieldname;
+    char **fieldarray;
     recon_status status = RECON_OK;
     status = recon_wall_object_find_field(object, "myobj", &fieldindex); if (status != RECON_OK) { return status; }
     status = recon_wall_object_get_field(object, fieldindex, &field); if (status != RECON_OK) { return status; }
     status = recon_wall_object_get_field_ischar(field, &isstring); if (status != RECON_OK) { return status; }
     status = recon_wall_object_get_field_value(field, (void**)&msgobj); if (status != RECON_OK) { return status; }
-    printf("Object fetched from wall:\n\n");
-    status = recon_wall_object_print_mobj(msgobj);   
+    printf("Object fetched from wall (msgpack form):\n\n");
+    status = recon_wall_object_print_mobj(msgobj);
+    printf("After field elements have been tokenized\n\n");
+    if (!isstring) {
+        status = recon_wall_object_parse_field_value_elements(field, &elems, &noelements); if (status != RECON_OK) { return status; }
+        for (i = 0; i < noelements; i++) {
+            status = recon_wall_object_get_field_value_element(elems, i, &fieldname, &fieldarray, &len_array);
+            printf("name: %s\n", fieldname);
+            printf("value: %s", fieldarray[0]);
+            for (j = 1; j < len_array; j++) {
+                printf(", %s", fieldarray[j]);
+            }
+            printf("\n");
+       }
+    }   
     return status;
 }
 
+
+void testOwn() {
+    recon_wall wall;
+    recon_wall_table table;
+    int nrows = -1;
+    recon_status status;
+    status = recon_wall_open("FB11Jan.wll", &wall);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed counting rows\n");
+        return;
+    }
+    status = recon_wall_find_table(wall, "Continuous", &table);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed finding table\n");
+        return;
+    }
+    status = recon_wall_table_count_rows(table, &nrows);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed counting rows\n");
+        return;
+    }
+    status = recon_wall_close(wall);
+    if (status != RECON_OK) {
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed close\n");
+        return;
+    }
+}
 
 void test1() {
     int i, j;
@@ -325,6 +368,7 @@ void test2() {
 
 int main(int argc, char** argv) {
     time_t t0, t1;
+    //testOwn();
     printf("%%SUITE_STARTING%% wallwritetest\n");
     printf("%%SUITE_STARTED%%\n");
 

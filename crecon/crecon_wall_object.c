@@ -355,6 +355,114 @@ recon_status recon_wall_object_get_field(recon_wall_object obj, int index, recon
     *out = (recon_wall_object_field)&(object->fields[index]);
 }
 
+recon_status recon_wall_object_get_n_fields(recon_wall_object obj, int *n) {
+    wall_object* object;
+    object = (wall_object*) obj;
+    *n = object->ndefinedfields;
+    return RECON_OK;
+}
+
+recon_status recon_wall_object_get_field_name(recon_wall_object_field field, char **name) {
+    wall_field* wf;
+    wf = (wall_field*) field;
+    *name = wf->name;
+    return RECON_OK;
+}
+
+recon_status recon_wall_object_get_field_value_element(recon_wall_object_field_element elems, int index, char **name, char ***values, int *no_values) {
+    wall_field_element *elements = (wall_field_element*) elems;
+    wall_field_element *out = &(elements[index]);
+    *name = out->name;
+    *values = out->values;
+    *no_values = out->novalues;
+    return RECON_OK;
+}
+
+recon_status recon_wall_object_parse_field_value_elements(recon_wall_object_field field, recon_wall_object_field_element *elems, int *no_elements) {
+    recon_status status = RECON_OK;
+    wall_object_mobj *mobj;
+    msgpack_object_kv* p;
+    msgpack_object_kv* pend;
+    msgpack_object_map map;
+    int n = 0, size_elements = 10;     //Initial size
+    wall_field *wf = (wall_field*) field;
+    wall_field_element *buffer_element;
+    wall_field_element *elements;
+    if (wf->fieldischar) {
+        //Can use recon_wall_object_get_field_value
+        return RECON_SCALAR_FIELD_VALUE;
+    }
+    mobj = (wall_object_mobj*)wf->field;
+    if (mobj->data->type != MSGPACK_OBJECT_MAP) {
+        return RECON_SCALAR_FIELD_VALUE;
+    }   
+    elements = (wall_field_element*)malloc(size_elements*sizeof(wall_field_element));
+    buffer_element = (wall_field_element*)malloc(sizeof(wall_field_element));
+    map = mobj->data->via.map;
+    if (map.size != 0) {
+        if (n > size_elements-1) {
+            size_elements *=2;
+            elements = (wall_field_element*)realloc(elements, size_elements*sizeof(wall_field_element));
+        }
+        p = map.ptr;
+        status = recon_wall_object_field_visit_elements_key_value(p->key, p->val, buffer_element);
+        if (status != RECON_OK) {
+            return status;
+        }
+        memcpy(&(elements[n]), buffer_element, sizeof(wall_field_element));
+        n++;
+        ++p;
+        pend = map.ptr + map.size;
+        for (; p < pend; ++p) {
+            status = recon_wall_object_field_visit_elements_key_value(p->key, p->val, buffer_element);
+            if (status != RECON_OK) {
+                return status;
+            }
+            memcpy(&(elements[n]), buffer_element, sizeof(wall_field_element));
+            n++;
+        }
+    }
+    *no_elements = n;
+    *elems = (recon_wall_object_field_element)elements;
+    free(buffer_element);
+    return status;
+}
+
+
+#define BUFFER_STRING_SIZE 200
+recon_status recon_wall_object_field_visit_elements_key_value(msgpack_object key, msgpack_object value, wall_field_element *element) {
+    recon_status status = RECON_OK;
+    int i = 0;
+    msgpack_object_array array;
+    //char buffer_string[BUFFER_STRING_SIZE];
+    element->name = (char*)malloc(key.via.raw.size+1);
+    memcpy(element->name, key.via.raw.ptr, key.via.raw.size);
+    element->name[key.via.raw.size] = '\0';
+    switch (value.type) {
+        case MSGPACK_OBJECT_RAW:
+            element->values = (char**) malloc(sizeof(char*));
+            element->values[0] = (char*) malloc(value.via.raw.size+1);
+            memcpy(element->values[0], value.via.raw.ptr, value.via.raw.size);
+            (element->values[0])[value.via.raw.size] = '\0';
+            element->novalues = 1;
+            break;
+        case MSGPACK_OBJECT_ARRAY:
+            array = value.via.array;
+            element->values = (char**) malloc(array.size*sizeof(char*));
+            for (i = 0; i < array.size; i++) {
+                if (array.ptr[i].type != MSGPACK_OBJECT_RAW) {
+                    return RECON_FIELD_DESERIALIZATION_ERROR;
+                }
+                element->values[i] = (char*)malloc(array.ptr[i].via.raw.size+1);
+                memcpy(element->values[i], array.ptr[i].via.raw.ptr, array.ptr[i].via.raw.size);
+                (element->values[i])[array.ptr[i].via.raw.size] = '\0';
+            }
+            element->novalues = array.size;
+            break;
+    }
+    return status;
+}
+
 recon_status recon_wall_object_get_field_value(recon_wall_object_field field, void **value) {
     wall_field* wf;
     wf = (wall_field*) field;
