@@ -55,8 +55,8 @@ void test1() {
             printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed adding signal %s, error=%i\n", signalname, status);
             return;
         }
-        //status = recon_transform_create_affine(&transform, -1.0, (double) i);
-		status = recon_transform_create_inverse(&transform);
+        status = recon_transform_create_affine(&transform, -1.0, (double) i);
+		//status = recon_transform_create_inverse(&transform);
         status = recon_wall_table_add_alias(table, aliasname, signalname, transform);
         free(signalname);
         free(aliasname);
