@@ -46,6 +46,7 @@ extern "C" {
                 msgpack_sbuffer* buffer;
 		msgpack_packer* packer;
                 msgpack_unpacked* msg;
+                msgpack_object* data;
                 recon_booleantype finalized;
         } wall_object_mobj;
 
@@ -151,7 +152,9 @@ extern "C" {
 
 	recon_status recon_wall_visit_table_elements(msgpack_object_map , msgpack_object_map* , msgpack_object_array* , msgpack_object_map* , msgpack_object_map*);
 
-
+        recon_status recon_wall_object_add_field(recon_wall_object obj, const char* name, void* value, recon_booleantype ischar);
+        
+        recon_status recon_wall_object_new_mobj_from_file(recon_wall_object_mobj *mobj, msgpack_object *obj_in);
 
 
 
