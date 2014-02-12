@@ -200,6 +200,7 @@ recon_status recon_wall_object_free_mobj(recon_wall_object_mobj mobj) {
         free(m_obj->msg);
     }
     free(m_obj);
+	return RECON_OK;
 }
 
 recon_status recon_wall_object_get_mobj_packer(recon_wall_object_mobj mobj, msgpack_packer **pack) {

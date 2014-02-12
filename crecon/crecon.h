@@ -45,7 +45,10 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
+	typedef unsigned char recon_booleantype;
 
+#define RECON_FALSE 0;
+#define RECON_TRUE 1;
     typedef int recon_status;
     typedef void* recon_wall;
     typedef void* recon_wall_table;
@@ -137,6 +140,8 @@ extern "C" {
      */
     recon_status recon_wall_find_table(recon_wall, const char*, recon_wall_table*);
 
+	recon_status recon_wall_find_table_for_signal(recon_wall, const char*, recon_wall_table*);
+
     /**
      * Add a signal to the table
      * @param 
@@ -188,6 +193,13 @@ extern "C" {
      * @return 
      */
     recon_status recon_wall_table_n_signals(recon_wall_table, int*, int*);
+
+	recon_status recon_wall_table_count_rows(recon_wall_table , int* );
+
+	recon_status recon_wall_table_get_signal_double(recon_wall_table , char* , double*);
+	recon_status recon_wall_table_get_signal_int(recon_wall_table , char* , int*);
+	recon_status recon_wall_table_get_signal_boolean(recon_wall_table , char* , recon_booleantype*);
+	recon_status recon_wall_table_get_signal_object(recon_wall_table , char* , msgpack_object*);
 
     // ROW FUNCTIONS
 
@@ -306,11 +318,9 @@ extern "C" {
     recon_status recon_transform_create_none(char**);
     recon_status recon_transform_create_inverse(char**);
     recon_status recon_transform_create_affine(char**, double, double);
-
-    //recon_status recon_transform_apply_double(recon_transform, double,double);
-    //recon_status recon_transform_apply_float(recon_transform, float,float);
-    //recon_status recon_transform_apply_int(recon_transform, int,int);
-
+	recon_status recon_transform_apply_double(char*, double, double*);
+    recon_status recon_transform_apply_int(char*, int, int*);
+	recon_status recon_transform_apply_boolean(char*, recon_booleantype, recon_booleantype*);
 
 #ifdef	__cplusplus
 }
