@@ -136,6 +136,8 @@ extern "C" {
 	recon_status recon_wall_row_buffer_append(recon_wall_row_buffer* , char* , size_t );
 	recon_status recon_wall_row_destroy(recon_wall_row* );
 	recon_status recon_wall_row_buffer_destroy(recon_wall_row_buffer* );
+        recon_status recon_wall_object_add_field(recon_wall_object obj, const char* name, void* value, recon_booleantype ischar);
+        recon_status recon_wall_object_new_mobj_from_file(recon_wall_object_mobj *mobj, msgpack_object *obj_in);
 
 #ifdef	__cplusplus
 }
