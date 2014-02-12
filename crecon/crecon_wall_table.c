@@ -90,6 +90,19 @@ recon_status recon_wall_table_find_signal(recon_wall_table tab, const char* name
     return RECON_NOT_FOUND;
 }
 
+recon_status recon_wall_table_find_alias(recon_wall_table tab, const char* name, char** of, char** transform) {
+    int i;
+    wall_table* table = (wall_table*) tab;
+    for (i = 0; i < table->ndefinedaliases; i++) {
+        if (strcmp(name, table->aliases[i]) == 0) {
+            *of = table->aliased[i];
+			*transform = table->transforms[i];
+            return RECON_OK;
+        }
+    }
+    return RECON_NOT_FOUND;
+}
+
 recon_status recon_wall_table_get_signal(recon_wall_table tab, int index, char** name) {
     wall_table* table = (wall_table*) tab;
     if (index < 0 || index >= table->ndefinedsignals) {

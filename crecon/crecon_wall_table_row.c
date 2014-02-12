@@ -226,6 +226,8 @@ recon_status recon_wall_table_get_signal_double(recon_wall_table tab, char* sign
     recon_status status = RECON_OK;
     wall_table* table = (wall_table*) tab;
     wall_file* file = (wall_file*) table->wall;
+	char* aliased;
+	char* transform;
     msgpack_object* object;
     msgpack_object_map map;
     msgpack_object_array array;
@@ -234,8 +236,17 @@ recon_status recon_wall_table_get_signal_double(recon_wall_table tab, char* sign
     int column;
     status = recon_wall_table_find_signal(tab, signal, &column);
     if (status != RECON_OK) {
-        return status;
-    }
+		status = recon_wall_table_find_alias(tab, signal, &aliased, &transform);
+		if (status != RECON_OK) {
+			return status;
+		}
+		status = recon_wall_table_find_signal(tab, aliased, &column);
+        if (status != RECON_OK) {
+			return status;
+		}
+    } else {
+		transform = "";
+	}
     if (file->nrows < 0) {
         status = recon_wall_visit_rows(file);
         if (status != RECON_OK) {
@@ -273,6 +284,10 @@ recon_status recon_wall_table_get_signal_double(recon_wall_table tab, char* sign
                                 default:
                                     s[n] = 0.0;
                             }
+							status = recon_transform_apply_double(transform, s[n], &(s[n]));
+							if(status != RECON_OK) {
+								return status;
+							}
                             n++;
                             break;
                     }
@@ -288,6 +303,8 @@ recon_status recon_wall_table_get_signal_integer(recon_wall_table tab, char* sig
     recon_status status = RECON_OK;
     wall_table* table = (wall_table*) tab;
     wall_file* file = (wall_file*) table->wall;
+	char* aliased;
+	char* transform;
     msgpack_object* object;
     msgpack_object_map map;
     msgpack_object_array array;
@@ -296,8 +313,17 @@ recon_status recon_wall_table_get_signal_integer(recon_wall_table tab, char* sig
     int column;
     status = recon_wall_table_find_signal(tab, signal, &column);
     if (status != RECON_OK) {
-        return status;
-    }
+		status = recon_wall_table_find_alias(tab, signal, &aliased, &transform);
+		if (status != RECON_OK) {
+			return status;
+		}
+		status = recon_wall_table_find_signal(tab, aliased, &column);
+        if (status != RECON_OK) {
+			return status;
+		}
+    } else {
+		transform = "";
+	}
     if (file->nrows < 0) {
         status = recon_wall_visit_rows(file);
         if (status != RECON_OK) {
@@ -332,6 +358,10 @@ recon_status recon_wall_table_get_signal_integer(recon_wall_table tab, char* sig
                                 default:
                                     s[n] = 0;
                             }
+							status = recon_transform_apply_int(transform, s[n], &(s[n]));
+							if(status != RECON_OK) {
+								return status;
+							}
                             n++;
                             break;
                     }
@@ -347,6 +377,8 @@ recon_status recon_wall_table_get_signal_boolean(recon_wall_table tab, char* sig
     recon_status status = RECON_OK;
     wall_table* table = (wall_table*) tab;
     wall_file* file = (wall_file*) table->wall;
+	char* aliased;
+	char* transform;
     msgpack_object* object;
     msgpack_object_map map;
     msgpack_object_array array;
@@ -355,8 +387,17 @@ recon_status recon_wall_table_get_signal_boolean(recon_wall_table tab, char* sig
     int column;
     status = recon_wall_table_find_signal(tab, signal, &column);
     if (status != RECON_OK) {
-        return status;
-    }
+		status = recon_wall_table_find_alias(tab, signal, &aliased, &transform);
+		if (status != RECON_OK) {
+			return status;
+		}
+		status = recon_wall_table_find_signal(tab, aliased, &column);
+        if (status != RECON_OK) {
+			return status;
+		}
+    } else {
+		transform = "";
+	}
     if (file->nrows < 0) {
         status = recon_wall_visit_rows(file);
         if (status != RECON_OK) {
@@ -399,6 +440,10 @@ recon_status recon_wall_table_get_signal_boolean(recon_wall_table tab, char* sig
                                 default:
                                     s[n] = RECON_FALSE;
                             }
+							status = recon_transform_apply_boolean(transform, s[n], &(s[n]));
+							if(status != RECON_OK) {
+								return status;
+							}
                             n++;
                             break;
                     }
@@ -414,6 +459,8 @@ recon_status recon_wall_table_get_signal_object(recon_wall_table tab, char* sign
     recon_status status = RECON_OK;
     wall_table* table = (wall_table*) tab;
     wall_file* file = (wall_file*) table->wall;
+	char* aliased;
+	char* transform;
     msgpack_object* object;
     msgpack_object_map map;
     msgpack_object_array array;
@@ -422,8 +469,17 @@ recon_status recon_wall_table_get_signal_object(recon_wall_table tab, char* sign
     int column;
     status = recon_wall_table_find_signal(tab, signal, &column);
     if (status != RECON_OK) {
-        return status;
-    }
+		status = recon_wall_table_find_alias(tab, signal, &aliased, &transform);
+		if (status != RECON_OK) {
+			return status;
+		}
+		status = recon_wall_table_find_signal(tab, aliased, &column);
+        if (status != RECON_OK) {
+			return status;
+		}
+    } else {
+		transform = "";
+	}
     if (file->nrows < 0) {
         status = recon_wall_visit_rows(file);
         if (status != RECON_OK) {
