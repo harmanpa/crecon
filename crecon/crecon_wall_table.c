@@ -172,12 +172,18 @@ recon_status recon_wall_find_table(recon_wall wall, const char* name, recon_wall
 recon_status recon_wall_find_table_for_signal(recon_wall wall, const char* signalname, recon_wall_table* out) {
 	int i;
 	int index;
+	char* aliased;
+	char* transform;
     wall_file* file = (wall_file*) wall;
     for (i = 0; i < file->ndefinedtables; i++) {
 		if(RECON_OK == recon_wall_table_find_signal((recon_wall_table)&(file->tables[i]), signalname, &index)) {
             *out = (recon_wall_table) &(file->tables[i]);
             return RECON_OK;
         }
+		if(RECON_OK == recon_wall_table_find_alias((recon_wall_table)&(file->tables[i]), signalname, &aliased, &transform)) {
+			*out = (recon_wall_table) &(file->tables[i]);
+            return RECON_OK;
+		}
     }
     return RECON_NOT_FOUND;
 }
