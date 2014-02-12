@@ -183,7 +183,7 @@ recon_status recon_wall_row_buffer_append(recon_wall_row_buffer* buffer, char* d
     recon_wall_row* row;
     if (buffer->alloc - buffer->size < 1) {
         size_t nsize = (buffer->alloc) ? buffer->alloc * 2 : RECON_WALL_ROW_BUFFER_SIZE;
-        void* tmp = realloc(buffer->data, nsize);
+        void* tmp = realloc(buffer->data, nsize*sizeof(recon_wall_row));
         if (!tmp) {
             return RECON_BUFFER_RESIZE_ERROR;
         }

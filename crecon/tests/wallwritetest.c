@@ -193,7 +193,7 @@ void test1() {
 
 void test2() {
     uint32_t i;
-    char* a = (char*) malloc(8);
+    unsigned char* a = (unsigned char*) malloc(8);
     recon_util_int_to_bytes(22, a + 4);
     i = recon_util_bytes_to_int(a + 4);
     if (i != 22) {
