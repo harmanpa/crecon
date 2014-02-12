@@ -140,7 +140,7 @@ recon_status recon_wall_get_table(recon_wall wall, int n, recon_wall_table* out)
     if (n < 0 || n >= file->ndefinedtables) {
         return RECON_UNDEFINED;
     }
-    *out = (recon_wall_table*) &(file->tables[n]);
+    *out = (recon_wall_table) &(file->tables[n]);
     return RECON_OK;
 }
 
@@ -149,10 +149,22 @@ recon_status recon_wall_find_table(recon_wall wall, const char* name, recon_wall
     wall_file* file = (wall_file*) wall;
     for (i = 0; i < file->ndefinedtables; i++) {
         if (strcmp(name, file->tables[i].name) == 0) {
-            *out = (recon_wall_table*) &(file->tables[i]);
+            *out = (recon_wall_table) &(file->tables[i]);
             return RECON_OK;
         }
     }
     return RECON_NOT_FOUND;
 }
 
+recon_status recon_wall_find_table_for_signal(recon_wall wall, const char* signalname, recon_wall_table* out) {
+	int i;
+	int index;
+    wall_file* file = (wall_file*) wall;
+    for (i = 0; i < file->ndefinedtables; i++) {
+		if(RECON_OK == recon_wall_table_find_signal((recon_wall_table)&(file->tables[i]), signalname, &index)) {
+            *out = (recon_wall_table) &(file->tables[i]);
+            return RECON_OK;
+        }
+    }
+    return RECON_NOT_FOUND;
+}
