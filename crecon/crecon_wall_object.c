@@ -353,6 +353,7 @@ recon_status recon_wall_object_get_field(recon_wall_object obj, int index, recon
         return RECON_UNDEFINED;
     }
     *out = (recon_wall_object_field)&(object->fields[index]);
+    return RECON_OK;
 }
 
 recon_status recon_wall_object_get_n_fields(recon_wall_object obj, int *n) {

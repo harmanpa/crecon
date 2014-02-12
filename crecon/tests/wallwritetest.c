@@ -117,32 +117,6 @@ recon_status test1_read_myobj(recon_wall_object object) {
 }
 
 
-void testOwn() {
-    recon_wall wall;
-    recon_wall_table table;
-    int nrows = -1;
-    recon_status status;
-    status = recon_wall_open("FB11Jan.wll", &wall);
-    if (status != RECON_OK) {
-        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed counting rows\n");
-        return;
-    }
-    status = recon_wall_find_table(wall, "Continuous", &table);
-    if (status != RECON_OK) {
-        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed finding table\n");
-        return;
-    }
-    status = recon_wall_table_count_rows(table, &nrows);
-    if (status != RECON_OK) {
-        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed counting rows\n");
-        return;
-    }
-    status = recon_wall_close(wall);
-    if (status != RECON_OK) {
-        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed close\n");
-        return;
-    }
-}
 
 void test1() {
     int i, j;
@@ -368,7 +342,6 @@ void test2() {
 
 int main(int argc, char** argv) {
     time_t t0, t1;
-    //testOwn();
     printf("%%SUITE_STARTING%% wallwritetest\n");
     printf("%%SUITE_STARTED%%\n");
 
