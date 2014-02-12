@@ -426,6 +426,7 @@ recon_status recon_wall_object_read_field(recon_wall_object obj, msgpack_object_
     char *fieldname;
     char *fieldvaluestr;
     uint32_t lenstr;
+    int index;
     recon_booleantype ischar;
     lenstr = (fieldmap->ptr)->key.via.raw.size;
     fieldname = (char*) malloc(lenstr+1);

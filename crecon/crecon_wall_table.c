@@ -108,8 +108,7 @@ recon_status recon_wall_table_get_signal(recon_wall_table tab, int index, char**
     if (index < 0 || index >= table->ndefinedsignals) {
         return RECON_UNDEFINED;
     }
-    //*name = table->signals[index];
-    memcpy(*name, table->signals[index], strlen(table->signals[index]) + 1);
+    *name = table->signals[index];
     return RECON_OK;
 }
 
@@ -118,8 +117,7 @@ recon_status recon_wall_table_get_alias(recon_wall_table tab, int index, char** 
     if (index < 0 || index >= table->ndefinedaliases) {
         return RECON_UNDEFINED;
     }
-    //*name = table->aliases[index];
-    memcpy(*name, table->aliases[index], strlen(table->aliases[index]) + 1);
+    *name = table->aliases[index];
     return RECON_OK;
 }
 
@@ -143,6 +141,8 @@ recon_status recon_wall_table_add_alias(recon_wall_table tab, const char* alias,
     if (transform) {
         table->transforms[table->ndefinedaliases] = (char*) malloc(strlen(transform) + 1);
         memcpy(table->transforms[table->ndefinedaliases], transform, strlen(transform) + 1);
+    } else {
+        table->transforms[table->ndefinedaliases] = "";
     }
     table->ndefinedaliases++;
     return RECON_OK;
