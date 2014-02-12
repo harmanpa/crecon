@@ -30,45 +30,44 @@ recon_status recon_transform_create_affine(char** t, double scale, double offset
 }
 
 recon_status recon_transform_apply_double(char* transform, double in, double* out) {
-	double scale;
-	double offset;
-	char* token;
-	if(transform) {
-		if(strcmp(transform, "inv")==0) {
-			*out = in * -1.0;
-			return RECON_OK;
-		}
-		if(sscanf(transform, "aff(%lf,%lf)", &scale, &offset)==2) {
-			*out = (in + offset) * scale;
-			return RECON_OK;
-		}
-	}
-	*out = in;
-	return RECON_OK;
+    double scale;
+    double offset;
+    if (transform) {
+        if (strcmp(transform, "inv") == 0) {
+            *out = in * -1.0;
+            return RECON_OK;
+        }
+        if (sscanf(transform, "aff(%lf,%lf)", &scale, &offset) == 2) {
+            *out = (in + offset) * scale;
+            return RECON_OK;
+        }
+    }
+    *out = in;
+    return RECON_OK;
 }
 
 recon_status recon_transform_apply_int(char* transform, int in, int* out) {
-	if(transform) {
-		if(strcmp(transform, "inv")==0) {
-			*out = in * -1;
-			return RECON_OK;
-		}
-	}
-	*out = in;
-	return RECON_OK;
+    if (transform) {
+        if (strcmp(transform, "inv") == 0) {
+            *out = in * -1;
+            return RECON_OK;
+        }
+    }
+    *out = in;
+    return RECON_OK;
 }
 
 recon_status recon_transform_apply_boolean(char* transform, recon_booleantype in, recon_booleantype* out) {
-	if(transform) {
-		if(strcmp(transform, "inv")==0) {
-			if(in) {
-				*out = RECON_FALSE;
-			} else {
-				*out = RECON_TRUE;
-			}
-			return RECON_OK;
-		}
-	}
-	*out = in;
-	return RECON_OK;
+    if (transform) {
+        if (strcmp(transform, "inv") == 0) {
+            if (in) {
+                *out = RECON_FALSE;
+            } else {
+                *out = RECON_TRUE;
+            }
+            return RECON_OK;
+        }
+    }
+    *out = in;
+    return RECON_OK;
 }
