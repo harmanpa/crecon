@@ -69,6 +69,7 @@ recon_status test1_write_mobj_field(recon_wall_object object) {
     // Finished manual construction
     status = recon_wall_object_finish_mobj(msgobj); if (status != RECON_OK) { return status; }
     // Check it looks right
+    printf("Object to be written to wall:\n\n");
     status = recon_wall_object_print_mobj(msgobj); if (status != RECON_OK) { return status; }
     // Serialize it to wall file
     status = recon_wall_start_field_entry(object); if (status != RECON_OK) { return status; }
@@ -94,6 +95,7 @@ recon_status test1_read_myobj(recon_wall_object object) {
     status = recon_wall_object_get_field(object, fieldindex, &field); if (status != RECON_OK) { return status; }
     status = recon_wall_object_get_field_ischar(field, &isstring); if (status != RECON_OK) { return status; }
     status = recon_wall_object_get_field_value(field, (void**)&msgobj); if (status != RECON_OK) { return status; }
+    printf("Object fetched from wall:\n\n");
     status = recon_wall_object_print_mobj(msgobj);   
     return status;
 }
