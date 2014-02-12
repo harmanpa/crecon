@@ -168,33 +168,33 @@ recon_status recon_wall_object_add_field_int(recon_wall_object obj, const char* 
 
 recon_status recon_wall_object_new_mobj(recon_wall_object_mobj *mobj) {
     wall_object_mobj *m_obj;
-    m_obj = (wall_object_mobj*)malloc(sizeof(wall_object_mobj));
+    m_obj = (wall_object_mobj*) malloc(sizeof (wall_object_mobj));
     m_obj->buffer = msgpack_sbuffer_new();
     m_obj->packer = msgpack_packer_new(m_obj->buffer, msgpack_sbuffer_write);
     msgpack_sbuffer_init(m_obj->buffer);
     m_obj->msg = NULL;
     m_obj->data = NULL;
     m_obj->finalized = RECON_FALSE;
-    *mobj = (recon_wall_object_mobj)m_obj;
+    *mobj = (recon_wall_object_mobj) m_obj;
     return RECON_OK;
 }
 
 recon_status recon_wall_object_new_mobj_from_file(recon_wall_object_mobj *mobj, msgpack_object *obj_in) {
     wall_object_mobj *m_obj;
-    m_obj = (wall_object_mobj*)malloc(sizeof(wall_object_mobj));
+    m_obj = (wall_object_mobj*) malloc(sizeof (wall_object_mobj));
     m_obj->buffer = NULL;
     m_obj->packer = NULL;
     m_obj->msg = NULL;
     m_obj->data = obj_in;
     m_obj->finalized = RECON_TRUE;
-    *mobj = (recon_wall_object_mobj)m_obj;
+    *mobj = (recon_wall_object_mobj) m_obj;
     return RECON_OK;
 }
 
 recon_status recon_wall_object_finish_mobj(recon_wall_object_mobj mobj) {
-    wall_object_mobj *m_obj = (wall_object_mobj*)mobj;
+    wall_object_mobj *m_obj = (wall_object_mobj*) mobj;
     msgpack_sbuffer *buffer = m_obj->buffer;
-    m_obj->msg = malloc(sizeof(msgpack_unpacked));
+    m_obj->msg = malloc(sizeof (msgpack_unpacked));
     msgpack_unpacked_init(m_obj->msg);
     msgpack_unpack_next(m_obj->msg, buffer->data, buffer->size, NULL);
     m_obj->data = &(m_obj->msg->data);
@@ -203,21 +203,22 @@ recon_status recon_wall_object_finish_mobj(recon_wall_object_mobj mobj) {
 }
 
 recon_status recon_wall_object_free_mobj(recon_wall_object_mobj mobj) {
-    wall_object_mobj *m_obj = (wall_object_mobj*)mobj;
+    wall_object_mobj *m_obj = (wall_object_mobj*) mobj;
     if (m_obj->buffer) {
         msgpack_sbuffer_free(m_obj->buffer);
     }
     if (m_obj->packer) {
-        msgpack_packer_free(m_obj->packer);        
+        msgpack_packer_free(m_obj->packer);
     }
     if (m_obj->msg) {
         free(m_obj->msg);
     }
     free(m_obj);
+    return RECON_OK;
 }
 
 recon_status recon_wall_object_get_mobj_packer(recon_wall_object_mobj mobj, msgpack_packer **pack) {
-    wall_object_mobj *m_obj = (wall_object_mobj*)mobj;
+    wall_object_mobj *m_obj = (wall_object_mobj*) mobj;
     if (!m_obj->packer) {
         return RECON_OBJECT_DEFINITION_ERROR;
     }
@@ -226,7 +227,7 @@ recon_status recon_wall_object_get_mobj_packer(recon_wall_object_mobj mobj, msgp
 }
 
 recon_status recon_wall_object_get_mobj_buffer(recon_wall_object_mobj mobj, msgpack_sbuffer **buff) {
-    wall_object_mobj *m_obj = (wall_object_mobj*)mobj;
+    wall_object_mobj *m_obj = (wall_object_mobj*) mobj;
     if (!m_obj->buffer) {
         return RECON_OBJECT_DEFINITION_ERROR;
     }
@@ -235,7 +236,7 @@ recon_status recon_wall_object_get_mobj_buffer(recon_wall_object_mobj mobj, msgp
 }
 
 recon_status recon_wall_object_get_mobj_data(recon_wall_object_mobj mobj, msgpack_object **data) {
-    wall_object_mobj *m_obj = (wall_object_mobj*)mobj;
+    wall_object_mobj *m_obj = (wall_object_mobj*) mobj;
     msgpack_object* msgdata;
     if (!m_obj->buffer || !m_obj->finalized) {
         return RECON_OBJECT_DEFINITION_ERROR;
@@ -245,7 +246,7 @@ recon_status recon_wall_object_get_mobj_data(recon_wall_object_mobj mobj, msgpac
 }
 
 recon_status recon_wall_object_print_mobj(recon_wall_object_mobj mobj) {
-    wall_object_mobj *m_obj = (wall_object_mobj*)mobj;
+    wall_object_mobj *m_obj = (wall_object_mobj*) mobj;
     if (!m_obj->finalized) {
         return RECON_NOT_FULLY_DEFINED;
     }
@@ -253,7 +254,6 @@ recon_status recon_wall_object_print_mobj(recon_wall_object_mobj mobj) {
     printf("\n\n\n************************************************************\n\n\n\n");
     return RECON_OK;
 }
-
 
 recon_status recon_wall_object_add_field_object(recon_wall_object obj, const char* name, void* v) {
     recon_status status = RECON_OK;
@@ -309,8 +309,8 @@ recon_status recon_wall_object_add_field(recon_wall_object obj, const char* name
         object->fields[object->ndefinedfields].field = (char*) malloc(strlen(value) + 1);
         memcpy(object->fields[object->ndefinedfields].field, value, strlen(value) + 1);
     } else {
-        object->fields[object->ndefinedfields].field = (wall_object_mobj*) malloc(sizeof(wall_object_mobj));
-        memcpy(object->fields[object->ndefinedfields].field, value, sizeof(wall_object_mobj));
+        object->fields[object->ndefinedfields].field = (wall_object_mobj*) malloc(sizeof (wall_object_mobj));
+        memcpy(object->fields[object->ndefinedfields].field, value, sizeof (wall_object_mobj));
     }
     object->fields[object->ndefinedfields].fieldischar = ischar;
     object->ndefinedfields++;
@@ -327,7 +327,7 @@ recon_status recon_wall_object_update_field_value(recon_wall_object obj, int i, 
         realloc(object->fields[i].field, strlen(value) + 1);
         memcpy(object->fields[i].field, value, strlen(value) + 1);
     } else {
-        memcpy(object->fields[i].field, value, sizeof(wall_object_mobj));
+        memcpy(object->fields[i].field, value, sizeof (wall_object_mobj));
     }
     object->fields[i].fieldischar = ischar;
     return RECON_OK;
@@ -474,7 +474,7 @@ recon_status recon_wall_object_get_field_value(recon_wall_object_field field, vo
 recon_status recon_wall_object_get_field_ischar(recon_wall_object_field field, recon_booleantype *ischar) {
     wall_field* wf;
     wf = (wall_field*) field;
-    *ischar= wf->fieldischar;
+    *ischar = wf->fieldischar;
     return RECON_OK;
 }
 
@@ -514,7 +514,7 @@ recon_status recon_wall_object_get_fields(recon_wall_object obj) {
                 map = object->via.map;
                 if (memcmp(w_object->name, map.ptr->key.via.raw.ptr, map.ptr->key.via.raw.size) == 0) {
                     //Should be a map - entry name will be key
-                    if(map.ptr->val.type == MSGPACK_OBJECT_MAP) {
+                    if (map.ptr->val.type == MSGPACK_OBJECT_MAP) {
                         status = recon_wall_object_read_field(obj, &(map.ptr->val.via.map));
                         if (status != RECON_OK) {
                             return status;
@@ -534,9 +534,10 @@ recon_status recon_wall_object_read_field(recon_wall_object obj, msgpack_object_
     char *fieldname;
     char *fieldvaluestr;
     uint32_t lenstr;
+    int index;
     recon_booleantype ischar;
     lenstr = (fieldmap->ptr)->key.via.raw.size;
-    fieldname = (char*) malloc(lenstr+1);
+    fieldname = (char*) malloc(lenstr + 1);
     memcpy(fieldname, (fieldmap->ptr)->key.via.raw.ptr, lenstr);
     fieldname[lenstr] = '\0';
     ischar = (fieldmap->ptr)->val.type == MSGPACK_OBJECT_RAW;
@@ -544,7 +545,7 @@ recon_status recon_wall_object_read_field(recon_wall_object obj, msgpack_object_
         status = recon_wall_object_new_mobj_from_file(&mobj, &((fieldmap->ptr)->val));
     } else {
         lenstr = (fieldmap->ptr)->val.via.raw.size;
-        fieldvaluestr = (char*) malloc(lenstr+1);
+        fieldvaluestr = (char*) malloc(lenstr + 1);
         memcpy(fieldvaluestr, (fieldmap->ptr)->val.via.raw.ptr, lenstr);
         fieldvaluestr[lenstr] = '\0';
     }

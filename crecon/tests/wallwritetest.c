@@ -23,6 +23,7 @@ typedef struct {
 
 
 #define BUFFER_STRING_LENGTH 30
+
 recon_status test1_write_mobj_field(recon_wall_object object) {
     recon_status status = RECON_OK;
     int no_array_elements = 3, i = 0;
@@ -33,24 +34,33 @@ recon_status test1_write_mobj_field(recon_wall_object object) {
     recon_wall_object_mobj msgobj;
     msgpack_packer *packer;
     msgpack_sbuffer *buffer;
-    
+
     // Assemble the user object
-    myobj.str_a = (char*)malloc(strlen("string_a")+1);
+    myobj.str_a = (char*) malloc(strlen("string_a") + 1);
     myobj.str_a = "string_a";
-    myobj.str_b = (char*)malloc(strlen("string_b")+1);
+    myobj.str_b = (char*) malloc(strlen("string_b") + 1);
     myobj.str_b = "string_b";
-    myobj.str_array = (char**)malloc(no_array_elements*sizeof(char*));
+    myobj.str_array = (char**) malloc(no_array_elements * sizeof (char*));
     for (i = 0; i < no_array_elements; i++) {
         sprintf(buffer_string, "string_array_elem%i", i);
-        myobj.str_array[i] = (char*)malloc(strlen(buffer_string)+1);
-        memcpy(myobj.str_array[i], buffer_string, strlen(buffer_string)+1);
+        myobj.str_array[i] = (char*) malloc(strlen(buffer_string) + 1);
+        memcpy(myobj.str_array[i], buffer_string, strlen(buffer_string) + 1);
     }
     // Prepare recon_wall_object_mobj object to help construction
-    status = recon_wall_object_new_mobj(&msgobj); if (status != RECON_OK) { return status; }
-    status = recon_wall_object_get_mobj_packer(msgobj, &packer); if (status != RECON_OK) { return status; }
-    status = recon_wall_object_get_mobj_buffer(msgobj, &buffer); if (status != RECON_OK) { return status; }
+    status = recon_wall_object_new_mobj(&msgobj);
+    if (status != RECON_OK) {
+        return status;
+    }
+    status = recon_wall_object_get_mobj_packer(msgobj, &packer);
+    if (status != RECON_OK) {
+        return status;
+    }
+    status = recon_wall_object_get_mobj_buffer(msgobj, &buffer);
+    if (status != RECON_OK) {
+        return status;
+    }
     // Manually construct msgpack version of object
-    msgpack_pack_map(packer, 3);         //myobj : {str_a, str_b, str_array}
+    msgpack_pack_map(packer, 3); //myobj : {str_a, str_b, str_array}
     msgpack_pack_raw(packer, strlen("str_a"));
     msgpack_pack_raw_body(packer, "str_a", strlen("str_a"));
     msgpack_pack_raw(packer, strlen(myobj.str_a));
@@ -67,13 +77,25 @@ recon_status test1_write_mobj_field(recon_wall_object object) {
         msgpack_pack_raw_body(packer, myobj.str_array[i], strlen(myobj.str_array[i]));
     }
     // Finished manual construction
-    status = recon_wall_object_finish_mobj(msgobj); if (status != RECON_OK) { return status; }
+    status = recon_wall_object_finish_mobj(msgobj);
+    if (status != RECON_OK) {
+        return status;
+    }
     // Check it looks right
     printf("Object to be written to wall:\n\n");
-    status = recon_wall_object_print_mobj(msgobj); if (status != RECON_OK) { return status; }
+    status = recon_wall_object_print_mobj(msgobj);
+    if (status != RECON_OK) {
+        return status;
+    }
     // Serialize it to wall file
-    status = recon_wall_start_field_entry(object); if (status != RECON_OK) { return status; }
-    status = recon_wall_object_add_field_object(object, "myobj", msgobj); if (status != RECON_OK) { return status; }
+    status = recon_wall_start_field_entry(object);
+    if (status != RECON_OK) {
+        return status;
+    }
+    status = recon_wall_object_add_field_object(object, "myobj", msgobj);
+    if (status != RECON_OK) {
+        return status;
+    }
     status = recon_wall_end_field_entry(object);
     /*free(myobj.str_a);
     free(myobj.str_b);
@@ -115,7 +137,6 @@ recon_status test1_read_myobj(recon_wall_object object) {
     }   
     return status;
 }
-
 
 
 void test1() {
@@ -160,7 +181,7 @@ void test1() {
             return;
         }
         status = recon_transform_create_affine(&transform, -1.0, (double) i);
-		//status = recon_transform_create_inverse(&transform);
+        //status = recon_transform_create_inverse(&transform);
         status = recon_wall_table_add_alias(table, aliasname, signalname, transform);
         free(signalname);
         free(aliasname);
@@ -176,7 +197,7 @@ void test1() {
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed flush\n");
         return;
-    }   
+    }
     for (i = 0; i < nfields; i++) {
         status = recon_wall_start_field_entry(object);
         if (status != RECON_OK) {
@@ -198,7 +219,7 @@ void test1() {
         }
     }
     status = test1_write_mobj_field(object);
-   if (status != RECON_OK) {
+    if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed to write complex object field\n");
         return;
     }
@@ -252,29 +273,6 @@ void test1() {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed finding table\n");
         return;
     }
-    for (i = 0; i < nsignals; i++) {
-        signalname = (char*) calloc(9 + recon_util_digits(i), 1);
-        signalnamegot = (char*) calloc(9 + recon_util_digits(i), 1);
-        aliasname = (char*) calloc(9 + recon_util_digits(i), 1);
-        aliasnamegot = (char*) calloc(9 + recon_util_digits(i), 1);
-        sprintf(signalname, "%s%i", "variable", i);
-        sprintf(aliasname, "%i%s", i, "elbairav");
-        status = recon_wall_table_get_signal(table2, i, &signalnamegot);
-        if (status != RECON_OK || strcmp(signalname, signalnamegot) != 0) {
-            printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed finding signal\n");
-            return;
-        }
-        status = recon_wall_table_get_alias(table2, i, &aliasnamegot);
-        if (status != RECON_OK || strcmp(aliasname, aliasnamegot) != 0) {
-            printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed finding alias\n");
-            return;
-        }
-        free(signalname);
-        free(aliasname);
-        free(signalnamegot);
-        free(aliasnamegot);
-    }
-
 
     status = recon_wall_table_count_rows(table2, &nrows2);
     if (status != RECON_OK) {
@@ -286,14 +284,14 @@ void test1() {
 
     status = recon_wall_table_get_signal_double(table2, "variable1", signal);
     if (status != RECON_OK) {
-        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed reading signal\n");
+        printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed reading signal (%i)\n", status);
         return;
     }
     for (i = 0; i < nrows2; i++) {
         fprintf(stderr, "%f,", signal[i]);
     }
 
-	status = recon_wall_table_get_signal_double(table2, "1elbairav", signal);
+    status = recon_wall_table_get_signal_double(table2, "1elbairav", signal);
     if (status != RECON_OK) {
         printf("%%TEST_FAILED%% time=0 testname=test1 (wallwritetest) message=Failed reading signal\n");
         return;

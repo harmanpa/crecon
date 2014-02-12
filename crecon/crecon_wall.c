@@ -9,7 +9,7 @@ recon_status recon_wall_open(const char *filename, recon_wall* out) {
     char* header_data;
     msgpack_unpacked* header;
     msgpack_object object;
-    FILE *fp = fopen(filename, "a+");
+    FILE *fp = fopen(filename, "ab+");
     if (fp == NULL) {
         return RECON_READ_ERROR;
     }
