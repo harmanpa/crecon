@@ -312,14 +312,26 @@ extern "C" {
     recon_status recon_wall_object_new_mobj(recon_wall_object_mobj *mobj);
     recon_status recon_wall_object_finish_mobj(recon_wall_object_mobj mobj);
     recon_status recon_wall_object_free_mobj(recon_wall_object_mobj mobj);
+    recon_status recon_wall_object_new_mobj_from_file(recon_wall_object_mobj *mobj, msgpack_object *obj_in);
     recon_status recon_wall_object_get_mobj_packer(recon_wall_object_mobj mobj, msgpack_packer **pack);
     recon_status recon_wall_object_get_mobj_buffer(recon_wall_object_mobj mobj, msgpack_sbuffer **buff);
     recon_status recon_wall_object_get_mobj_data(recon_wall_object_mobj mobj, msgpack_object **data);
     recon_status recon_wall_object_print_mobj(recon_wall_object_mobj mobj);
     
-    /* Read fields from buffer into object*/
+    /* Methods for processing individual object fields and their elements*/
     recon_status recon_wall_object_get_fields(recon_wall_object obj);
-
+    recon_status recon_wall_object_add_field(recon_wall_object obj, const char* name, void* value, recon_booleantype ischar);
+    recon_status recon_wall_object_find_field(recon_wall_object obj, const char* name, int* out);
+    recon_status recon_wall_object_get_field(recon_wall_object obj, int index, recon_wall_object_field *out);
+    recon_status recon_wall_object_get_n_fields(recon_wall_object obj, int *n);
+    recon_status recon_wall_object_get_field_name(recon_wall_object_field field, char **name);
+    recon_status recon_wall_object_extract_field_value_element(recon_wall_object_field_element elem, char **name, char ***values, int *no_values);
+    recon_status recon_wall_object_get_field_value_n_elements(recon_wall_object_field field, int *n);
+    recon_status recon_wall_object_get_field_value_element(recon_wall_object_field field, int i, recon_wall_object_field_element *elem);
+    recon_status recon_wall_object_find_field_value_element(recon_wall_object_field field, const char *name, recon_wall_object_field_element *elem);
+    recon_status recon_wall_object_parse_field_value_elements(recon_wall_object_field field);
+    recon_status recon_wall_object_get_field_value(recon_wall_object_field field, void **value);
+    recon_status recon_wall_object_get_field_ischar(recon_wall_object_field field, recon_booleantype *ischar);
     // TRANSFORMATIONS
 
     recon_status recon_transform_create_none(char**);
