@@ -47,7 +47,7 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-	typedef unsigned char recon_booleantype;
+    typedef unsigned char recon_booleantype;
 
 #define RECON_FALSE 0;
 #define RECON_TRUE 1;
@@ -67,7 +67,7 @@ extern "C" {
      * @return Status
      */
     recon_status recon_wall_open(const char*, recon_wall*);
-    
+
     /**
      * Create a new Wall file
      * @param File pointer
@@ -77,21 +77,21 @@ extern "C" {
      * @return Status
      */
     recon_status recon_wall_create(char*, int, int, recon_wall*);
-    
+
     /**
      * Close a Wall file
      * @param The Wall object
      * @return Status
      */
     recon_status recon_wall_close(recon_wall);
-    
+
     /**
      * Finalize a Wall file (write header)
      * @param The Wall object
      * @return Status
      */
     recon_status recon_wall_finalize(recon_wall);
-    
+
     /**
      * Flush data to file, finalizing first if necessary
      * @param The Wall object
@@ -117,15 +117,15 @@ extern "C" {
      * @return Status
      */
     recon_status recon_wall_add_table(recon_wall, const char*, int, int, recon_wall_table*);
-    
+
     /**
      * Get the number of tables in the Wall file
      * @param The Wall object
      * @param Pointer to number of tables
      * @return Status
      */
-    recon_status recon_wall_n_tables(recon_wall,int*);
-    
+    recon_status recon_wall_n_tables(recon_wall, int*);
+
     /**
      * Fetch a table by index
      * @param The Wall object
@@ -134,7 +134,7 @@ extern "C" {
      * @return Status
      */
     recon_status recon_wall_get_table(recon_wall, int, recon_wall_table*);
-    
+
     /**
      * Find a table by name
      * @param The Wall object
@@ -144,37 +144,44 @@ extern "C" {
      */
     recon_status recon_wall_find_table(recon_wall, const char*, recon_wall_table*);
 
-	recon_status recon_wall_find_table_for_signal(recon_wall, const char*, recon_wall_table*);
+    /**
+     * Find the first table containing the named signal
+     * @param The Wall object
+     * @param Signal name
+     * @param Pointer to returned table
+     * @return Status
+     */
+    recon_status recon_wall_find_table_for_signal(recon_wall, const char*, recon_wall_table*);
 
     /**
      * Add a signal to the table
-     * @param 
-     * @param 
-     * @return 
+     * @param The Table object
+     * @param Signal name
+     * @return Status
      */
     recon_status recon_wall_table_add_signal(recon_wall_table, const char*);
-    
+
     /**
-     * 
-     * @param 
-     * @param 
-     * @param 
-     * @param 
-     * @return 
+     * An an aliased signal
+     * @param The Table object
+     * @param Signal name
+     * @param Original signal name
+     * @param The transform, see recon_transform_xxx functions
+     * @return Status
      */
     recon_status recon_wall_table_add_alias(recon_wall_table, const char*, const char*, char*);
 
     /**
-     * 
-     * @param 
-     * @param 
-     * @param 
-     * @return 
+     * Find a signal by name
+     * @param The Table object
+     * @param Signal name
+     * @param Index of the signal
+     * @return Status
      */
     recon_status recon_wall_table_find_signal(recon_wall_table, const char*, int*);
-    
+
     /**
-     * 
+     * Get an alias by index
      * @param 
      * @param 
      * @param 
@@ -198,12 +205,18 @@ extern "C" {
      */
     recon_status recon_wall_table_n_signals(recon_wall_table, int*, int*);
 
-	recon_status recon_wall_table_count_rows(recon_wall_table , int* );
+    /**
+     * 
+     * @param 
+     * @param 
+     * @return 
+     */
+    recon_status recon_wall_table_count_rows(recon_wall_table, int*);
 
-	recon_status recon_wall_table_get_signal_double(recon_wall_table , char* , double*);
-	recon_status recon_wall_table_get_signal_int(recon_wall_table , char* , int*);
-	recon_status recon_wall_table_get_signal_boolean(recon_wall_table , char* , recon_booleantype*);
-	recon_status recon_wall_table_get_signal_object(recon_wall_table , char* , msgpack_object*);
+    recon_status recon_wall_table_get_signal_double(recon_wall_table, char*, double*);
+    recon_status recon_wall_table_get_signal_int(recon_wall_table, char*, int*);
+    recon_status recon_wall_table_get_signal_boolean(recon_wall_table, char*, recon_booleantype*);
+    recon_status recon_wall_table_get_signal_object(recon_wall_table, char*, msgpack_object*);
 
     // ROW FUNCTIONS
 
@@ -233,7 +246,7 @@ extern "C" {
      * @param The value to be written
      */
     recon_status recon_wall_table_row_add_string(recon_wall_table, char*);
-    
+
     /**
      * Append a double array to the current row
      * @param The table to be written to
@@ -241,7 +254,7 @@ extern "C" {
      * @param The number of values in the array
      */
     recon_status recon_wall_table_row_add_double_array(recon_wall_table, double*, int);
-    
+
     /**
      * Append an int array to the current row
      * @param The table to be written to
@@ -249,7 +262,7 @@ extern "C" {
      * @param The number of values in the array
      */
     recon_status recon_wall_table_row_add_int_array(recon_wall_table, int*, int);
-    
+
     /**
      * Append a string array to the current row
      * @param The table to be written to
@@ -263,7 +276,7 @@ extern "C" {
      * @param The table to be written to
      */
     recon_status recon_wall_table_end_row(recon_wall_table);
-    
+
     // OBJECT FUNCTIONS
 
     /**
@@ -280,17 +293,17 @@ extern "C" {
      * @param 
      * @return 
      */
-    recon_status recon_wall_n_objects(recon_wall,int*);
-    recon_status recon_wall_get_object(recon_wall,int,recon_wall_object*);
-    recon_status recon_wall_find_object(recon_wall,const char*,recon_wall_object*);
-    
+    recon_status recon_wall_n_objects(recon_wall, int*);
+    recon_status recon_wall_get_object(recon_wall, int, recon_wall_object*);
+    recon_status recon_wall_find_object(recon_wall, const char*, recon_wall_object*);
+
     recon_status recon_wall_start_field_entry(recon_wall_object obj);
     recon_status recon_wall_object_add_field_string(recon_wall_object, const char*, const char*);
     recon_status recon_wall_object_add_field_double(recon_wall_object, const char*, double);
     recon_status recon_wall_object_add_field_int(recon_wall_object, const char*, int);
     recon_status recon_wall_object_add_field_object(recon_wall_object, const char*, void*);
     recon_status recon_wall_end_field_entry(recon_wall_object obj);
-    
+
     /* Helper methods for generation of object field entries in msgpack object form. Used 
      * in conjunction with direct calls to msgpack_pack functions.
      * Example form (for existing recon_wall_objet obj):
@@ -316,7 +329,7 @@ extern "C" {
     recon_status recon_wall_object_get_mobj_buffer(recon_wall_object_mobj mobj, msgpack_sbuffer **buff);
     recon_status recon_wall_object_get_mobj_data(recon_wall_object_mobj mobj, msgpack_object **data);
     recon_status recon_wall_object_print_mobj(recon_wall_object_mobj mobj);
-    
+
     /* Read fields from buffer into object*/
     recon_status recon_wall_object_get_fields(recon_wall_object obj);
 
@@ -325,9 +338,9 @@ extern "C" {
     recon_status recon_transform_create_none(char**);
     recon_status recon_transform_create_inverse(char**);
     recon_status recon_transform_create_affine(char**, double, double);
-	recon_status recon_transform_apply_double(char*, double, double*);
+    recon_status recon_transform_apply_double(char*, double, double*);
     recon_status recon_transform_apply_int(char*, int, int*);
-	recon_status recon_transform_apply_boolean(char*, recon_booleantype, recon_booleantype*);
+    recon_status recon_transform_apply_boolean(char*, recon_booleantype, recon_booleantype*);
 
 #ifdef	__cplusplus
 }
