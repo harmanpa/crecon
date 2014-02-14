@@ -112,7 +112,7 @@ recon_status test1_read_myobj(recon_wall_object object) {
     recon_booleantype isstring;
     recon_wall_object_mobj msgobj;
     recon_wall_object_field field;
-    recon_wall_object_field_element elems;
+    recon_wall_object_field_element elem;
     char *fieldname;
     char **fieldarray;
     recon_status status = RECON_OK;
@@ -136,12 +136,16 @@ recon_status test1_read_myobj(recon_wall_object object) {
     status = recon_wall_object_print_mobj(msgobj);
     printf("After field elements have been tokenized\n\n");
     if (!isstring) {
-        status = recon_wall_object_parse_field_value_elements(field, &elems, &noelements);
+        status = recon_wall_object_parse_field_value_elements(field);
         if (status != RECON_OK) {
             return status;
         }
         for (i = 0; i < noelements; i++) {
-            status = recon_wall_object_get_field_value_element(elems, i, &fieldname, &fieldarray, &len_array);
+            status = status = recon_wall_object_get_field_value_element(field, i, &elem);
+            if (status != RECON_OK) {
+                return status;
+            }
+            status =  recon_wall_object_extract_field_value_element(elem, &fieldname, &fieldarray, &len_array);
             if (status != RECON_OK) {
                 return status;
             }
