@@ -370,16 +370,44 @@ recon_status recon_wall_object_get_field_name(recon_wall_object_field field, cha
     return RECON_OK;
 }
 
-recon_status recon_wall_object_get_field_value_element(recon_wall_object_field_element elems, int index, char **name, char ***values, int *no_values) {
-    wall_field_element *elements = (wall_field_element*) elems;
-    wall_field_element *out = &(elements[index]);
-    *name = out->name;
-    *values = out->values;
-    *no_values = out->novalues;
+recon_status recon_wall_object_extract_field_value_element(recon_wall_object_field_element elem, char **name, char ***values, int *no_values) {
+    wall_field_element *element = (wall_field_element*) elem;
+    *name = element->name;
+    *values = element->values;
+    *no_values = element->novalues;
     return RECON_OK;
 }
 
-recon_status recon_wall_object_parse_field_value_elements(recon_wall_object_field field, recon_wall_object_field_element *elems, int *no_elements) {
+recon_status recon_wall_object_get_field_value_n_elements(recon_wall_object_field field, int *n) {
+    wall_field *wf = (wall_field*) field;
+    *n = wf->nelements;
+    return RECON_OK;
+}
+
+recon_status recon_wall_object_get_field_value_element(recon_wall_object_field field, int i, recon_wall_object_field_element *elem) {
+    recon_status status = RECON_OK;
+    wall_field *wf = (wall_field*) field;
+    if (i < 0 || i > wf->nelements) {
+        return RECON_UNDEFINED;
+    }
+    *elem = (recon_wall_object_field_element)&(wf->elements[i]);
+    return status;
+}
+
+recon_status recon_wall_object_find_field_value_element(recon_wall_object_field field, const char *name, recon_wall_object_field_element *elem) {
+    int i = 0;
+    wall_field *wf = (wall_field*) field;
+    wall_field_element *elements = wf->elements;
+    for (i = 0; i < wf->nelements; i++) {
+        if (strcmp(elements[i].name, name) == 0) {
+            *elem = (recon_wall_object_field_element)&(wf->elements[i]);
+            return RECON_OK;
+        }
+    }
+    return RECON_NOT_FOUND;
+}
+
+recon_status recon_wall_object_parse_field_value_elements(recon_wall_object_field field) {
     recon_status status = RECON_OK;
     wall_object_mobj *mobj;
     msgpack_object_kv* p;
@@ -391,6 +419,7 @@ recon_status recon_wall_object_parse_field_value_elements(recon_wall_object_fiel
     wall_field_element *elements;
     if (wf->fieldischar) {
         //Can use recon_wall_object_get_field_value
+        wf->nelements = 1;
         return RECON_SCALAR_FIELD_VALUE;
     }
     mobj = (wall_object_mobj*)wf->field;
@@ -423,8 +452,8 @@ recon_status recon_wall_object_parse_field_value_elements(recon_wall_object_fiel
             n++;
         }
     }
-    *no_elements = n;
-    *elems = (recon_wall_object_field_element)elements;
+    wf->nelements = n;
+    wf->elements = elements;
     free(buffer_element);
     return status;
 }

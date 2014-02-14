@@ -57,6 +57,8 @@ extern "C" {
 		char* name;
 		void* field;
 		recon_booleantype fieldischar;
+                wall_field_element* elements;
+                int nelements;
 	} wall_field;
 
 	typedef struct {
