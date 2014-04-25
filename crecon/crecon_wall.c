@@ -9,12 +9,14 @@ recon_status recon_wall_open(const char *filename, recon_wall* out) {
     char* header_data;
     msgpack_unpacked* header;
     msgpack_object object;
-    FILE *fp = fopen(filename, "ab+");
-    if (fp == NULL) {
+    FILE *fp = NULL;
+    fp = fopen(filename, "ab+");
+    if (fp == NULL || ferror(fp)) {
+        perror("Error opening wall file");
         return RECON_READ_ERROR;
     }
-    *out = (recon_wall*) malloc(sizeof (wall_file));
-    wall = (wall_file*) * out;
+    *out = (recon_wall) malloc(sizeof (wall_file));
+    wall = (wall_file*) *out;
     wall->fp = fp;
     rewind(wall->fp);
     wall->ndefinedtables = 0;
@@ -59,6 +61,9 @@ recon_status recon_wall_open(const char *filename, recon_wall* out) {
     free(header);
     free(header_size);
     free(header_data);
+    header = NULL;
+    header_size = NULL;
+    header_data = NULL;
     wall->currentrowtable = NULL;
     wall->finalized = RECON_TRUE;
     return status;
@@ -99,10 +104,15 @@ recon_status recon_wall_visit_object(wall_file* wall, char* name, uint32_t names
     int i;
     recon_status status = RECON_OK;
     recon_wall_object object;
-    char* objectname = (char*) malloc(namesize + 1);
-    memcpy(objectname, name, namesize);
-    objectname[namesize] = '\0';
+    char* objectname;
+    if (namesize > 0) {
+        objectname = (char*) malloc(namesize + 1);
+        memcpy(objectname, name, namesize);
+        objectname[namesize] = '\0';
+    }
     status = recon_wall_add_object(wall, objectname, &object);
+    free(objectname);
+    objectname = NULL;
     //TODO: Process object meta data.
     return status;
 }
@@ -148,7 +158,7 @@ recon_status recon_wall_visit_table(wall_file* wall, char* name, uint32_t namesi
     }
 
     free(tablename);
-
+    tablename = NULL;
     return status;
 }
 
@@ -170,6 +180,7 @@ recon_status recon_wall_table_visit_signals(recon_wall_table table, msgpack_obje
         }
     }
     free(variable_name);
+    variable_name = NULL;
     return status;
 }
 
@@ -202,6 +213,9 @@ recon_status recon_wall_table_visit_aliases(recon_wall_table table, msgpack_obje
     free(aliasname);
     free(aliasof);
     free(transform);
+    aliasname = NULL;
+    aliasof = NULL;
+    transform = NULL;
     return status;
 }
 
@@ -266,7 +280,7 @@ recon_status recon_wall_visit_table_elements(msgpack_object_map map, msgpack_obj
 recon_status recon_wall_create(char* filename, int nTables, int nObjects, recon_wall* out) {
     FILE* fp;
     wall_file* wall;
-    *out = (recon_wall*) malloc(sizeof (wall_file));
+    *out = (recon_wall) malloc(sizeof (wall_file));
     fp = fopen(filename, "w");
     wall = (wall_file*) * out;
     wall->fp = fp;
@@ -297,6 +311,7 @@ recon_status recon_wall_close(recon_wall wall) {
     if (0 != fclose(file->fp)) {
         return RECON_WRITE_ERROR;
     }
+    file->fp = NULL;
     if (file->packer != NULL) {
         msgpack_packer_free(file->packer);
         file->packer = NULL;
@@ -315,6 +330,7 @@ recon_status recon_wall_close(recon_wall wall) {
     }
     free(file->objects);
     free(wall);
+    wall = NULL;
     return RECON_OK;
 }
 
@@ -431,6 +447,7 @@ recon_status recon_wall_flush(recon_wall wall) {
         if (size == fwrite(file->buffer->data, 1, size, file->fp)) {
             msgpack_sbuffer_clear(file->buffer);
         } else {
+            perror("Error writing to wall file when flushing buffer");
             return RECON_WRITE_ERROR;
         }
     }
@@ -438,9 +455,10 @@ recon_status recon_wall_flush(recon_wall wall) {
 }
 
 recon_status recon_wall_unpack_fixed_header(wall_file* file, uint32_t* out) {
-    char* header = (char*) malloc(18);
+    unsigned char* header = (unsigned char*) malloc(18);
     if (18 != fread(header, 1, 18, file->fp)) {
         free(header);
+        header = NULL;
         return RECON_READ_ERROR;
     }
     if (strncmp(header, "recon:wall:v01", 14) != 0) {
@@ -448,6 +466,7 @@ recon_status recon_wall_unpack_fixed_header(wall_file* file, uint32_t* out) {
     }
     *out = recon_util_bytes_to_int(header + 14);
     free(header);
+    header = NULL;
     return RECON_OK;
 }
 
@@ -460,8 +479,10 @@ recon_status recon_wall_pack_fixed_header(wall_file* file, uint32_t header_size)
     }
     if (18 == fwrite(header, 1, 18, file->fp)) {
         free(header);
+        header = NULL;
         return RECON_OK;
     }
+    header = NULL;
     free(header);
     return RECON_WRITE_ERROR;
 }
@@ -475,6 +496,8 @@ recon_status recon_wall_visit_rows(wall_file* file) {
     if (status != RECON_OK) {
         free(sizeindicator);
         free(row_data);
+        sizeindicator = NULL;
+        row_data = NULL;
         return status;
     }
     file->nrows = 0;
@@ -484,12 +507,16 @@ recon_status recon_wall_visit_rows(wall_file* file) {
         if (n != fread(row_data, 1, n, file->fp)) {
             free(sizeindicator);
             free(row_data);
+            sizeindicator = NULL;
+            row_data = NULL;
             return RECON_READ_ERROR;
         }
         status = recon_wall_row_buffer_append(file->rows, row_data, n);
         if (status != RECON_OK) {
             free(sizeindicator);
             free(row_data);
+            sizeindicator = NULL;
+            row_data = NULL;
             return status;
         }
         file->nrows++;
@@ -497,5 +524,7 @@ recon_status recon_wall_visit_rows(wall_file* file) {
     }
     free(row_data);
     free(sizeindicator);
+    sizeindicator = NULL;
+    row_data = NULL;
     return RECON_OK;
 }

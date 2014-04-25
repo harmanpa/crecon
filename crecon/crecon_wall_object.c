@@ -38,6 +38,7 @@ recon_status recon_wall_free_object_field(wall_field* field) {
     free(field->name);
     if (field->fieldischar) {
         free(field->field);
+        field->field = NULL;
     } else {
         recon_wall_object_free_mobj(field->field);
     }
@@ -123,6 +124,7 @@ recon_status recon_wall_end_field_entry(recon_wall_object obj) {
     free(object->bufferedfields);
     object->bufferedfields = NULL;
     free(bytes);
+    bytes = NULL;
     return status;
 }
 
@@ -154,6 +156,7 @@ recon_status recon_wall_object_add_field_double(recon_wall_object obj, const cha
     sprintf(value, "%.*g", max_sig_digits, v);
     status = recon_wall_object_add_field_string(obj, name, value);
     free(value);
+    value = NULL;
     return status;
 }
 
@@ -163,6 +166,7 @@ recon_status recon_wall_object_add_field_int(recon_wall_object obj, const char* 
     sprintf(value, "%i", v);
     status = recon_wall_object_add_field_string(obj, name, value);
     free(value);
+    value = NULL;
     return status;
 }
 
@@ -214,6 +218,7 @@ recon_status recon_wall_object_free_mobj(recon_wall_object_mobj mobj) {
         free(m_obj->msg);
     }
     free(m_obj);
+    m_obj = NULL;
     return RECON_OK;
 }
 
@@ -324,7 +329,7 @@ recon_status recon_wall_object_update_field_value(recon_wall_object obj, int i, 
         return RECON_UNDEFINED;
     }
     if (ischar) {
-        realloc(object->fields[i].field, strlen(value) + 1);
+        object->fields[i].field = (char*) realloc(object->fields[i].field, strlen(value) + 1);
         memcpy(object->fields[i].field, value, strlen(value) + 1);
     } else {
         memcpy(object->fields[i].field, value, sizeof (wall_object_mobj));
@@ -581,7 +586,7 @@ recon_status recon_wall_object_read_field(recon_wall_object obj, msgpack_object_
     if (recon_wall_object_find_field(object, fieldname, &index) != RECON_OK) {
         status = recon_wall_object_add_field(object, fieldname, ischar ? fieldvaluestr : mobj, ischar);
     } else {
-        status = recon_wall_object_update_field_value(object, fieldname, ischar ? fieldvaluestr : mobj, ischar);
+        status = recon_wall_object_update_field_value(object, index, ischar ? fieldvaluestr : mobj, ischar);
     }
     return status;
 }

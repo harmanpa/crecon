@@ -21,11 +21,15 @@ recon_status recon_wall_add_table(recon_wall wall, const char* name, int nSignal
     table->name = (char*) malloc(strlen(name) + 1);
     memcpy(table->name, name, strlen(name) + 1);
     table->nsignals = nSignals;
-    table->signals = (char**) malloc(nSignals * sizeof (char*));
+    if (nSignals > 0) {
+        table->signals = (char**) malloc(nSignals * sizeof (char*));
+    }
     table->naliases = nAliases;
-    table->aliases = (char**) malloc(nAliases * sizeof (char*));
-    table->aliased = (char**) malloc(nAliases * sizeof (char*));
-    table->transforms = (char**) malloc(nAliases * sizeof (char*));
+    if (nAliases > 0) {
+        table->aliases = (char**) malloc(nAliases * sizeof (char*));
+        table->aliased = (char**) malloc(nAliases * sizeof (char*));
+        table->transforms = (char**) malloc(nAliases * sizeof (char*));
+    }
     table->ndefinedsignals = 0;
     table->ndefinedaliases = 0;
     file->ndefinedtables++;
@@ -50,14 +54,29 @@ recon_status recon_wall_free_table(wall_table* table) {
     int i;
     for (i = 0; i < table->ndefinedsignals; i++) {
         free(table->signals[i]);
+        table->signals[i] = NULL;
     }
     for (i = 0; i < table->ndefinedaliases; i++) {
-        //free(table->aliases[i]);
-        //free(table->aliased[i]);
-        //if (table->transforms[i]) {
-        //    free(table->transforms[i]);
-        //}
+        free(table->aliases[i]);
+        free(table->aliased[i]);
+        if (0 != strcmp(table->transforms[i], "")) {
+            free(table->transforms[i]);
+            table->transforms[i] = NULL;
+        }
     }
+    if (table->nsignals > 0) {
+        free(table->signals);
+        table->signals = NULL;
+    }
+    if (table->naliases > 0) {
+        free(table->aliases);
+        free(table->aliased);
+        free(table->transforms);
+        table->aliases = NULL;
+        table->aliased = NULL;
+        table->transforms = NULL;
+    }
+    free(table->name);
     return RECON_OK;
 }
 
