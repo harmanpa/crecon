@@ -303,6 +303,13 @@ extern "C" {
     recon_status recon_wall_object_add_field_int(recon_wall_object, const char*, int);
     recon_status recon_wall_object_add_field_object(recon_wall_object, const char*, void*);
     recon_status recon_wall_end_field_entry(recon_wall_object obj);
+    
+    
+    recon_status recon_wall_table_find_row_index(recon_wall_table tab, int tableIndex, int *bufferIndex);
+    recon_status recon_wall_table_get_row_double(recon_wall_table tab, int n, double *out);
+    recon_status recon_wall_table_get_row_integer(recon_wall_table tab, int n, int *out);
+    recon_status recon_wall_table_get_row_boolean(recon_wall_table tab, int n, recon_booleantype *out);
+    recon_status recon_wall_table_get_row_object(recon_wall_table tab, int n, msgpack_object* out);
 
     /* Helper methods for generation of object field entries in msgpack object form. Used 
      * in conjunction with direct calls to msgpack_pack functions.

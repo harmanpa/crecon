@@ -3,7 +3,7 @@
 recon_status recon_wall_table_start_row(recon_wall_table tab) {
     wall_table* table = (wall_table*) tab;
     wall_file* file = (wall_file*) table->wall;
-    if (file->currentrowtable) {
+    if (file->currentrowtable > -1 ) {
         return RECON_INCOMPLETE_ROW;
     }
     file->currentrowtable = table;
@@ -109,7 +109,7 @@ recon_status recon_wall_table_end_row(recon_wall_table tab) {
     size = file->buffer->size - (file->positionatrowstart + 4);
     recon_util_int_to_bytes(size, bytes);
     msgpack_sbuffer_insert(file->buffer, file->positionatrowstart, bytes, 4);
-    file->currentrowtable = NULL;
+    file->currentrowtable = -1;
     file->currentrowtablesize = 0;
     file->currentrowwritten = 0;
     return RECON_OK;
@@ -219,6 +219,312 @@ recon_status recon_wall_row_buffer_destroy(recon_wall_row_buffer* buffer) {
         }
     }
     free(buffer->data);
+    return RECON_OK;
+}
+
+// Find nth row  of table in rows buffer, return index in buffer
+recon_status recon_wall_table_find_row_index(recon_wall_table tab, int tableIndex, int *bufferIndex) {
+    recon_status status = RECON_OK;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    msgpack_object* object;
+    msgpack_object_map map;
+    int i;
+    int nTableRows = 0;
+    if (file->nrows < 0) {
+        status = recon_wall_visit_rows(file);
+        if (status != RECON_OK) {
+            return status;
+        }
+    }
+    for (i = 0; i < file->nrows; i++) {
+        status = recon_wall_row_buffer_get_object(file->rows, i, &object);
+        if (status != RECON_OK) {
+            return status;
+        }
+        switch (object->type) {
+            case MSGPACK_OBJECT_MAP:
+                map = object->via.map;
+                if (memcmp(table->name, map.ptr->key.via.raw.ptr, map.ptr->key.via.raw.size) == 0) {
+                    switch (map.ptr->val.type) {
+                        case MSGPACK_OBJECT_ARRAY:
+                            if (tableIndex == nTableRows) {
+                                *bufferIndex = i;
+                                return RECON_OK;
+                            }
+                            nTableRows++;
+                            break;
+                    }
+                }
+                break;
+        }
+    }
+    return RECON_NOT_FOUND;
+}
+
+
+
+// Get nth row of table as array of doubles
+recon_status recon_wall_table_get_row_double(recon_wall_table tab, int n, double *out) {
+    recon_status status = RECON_OK;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    msgpack_object *object;
+    msgpack_object_map map;
+    msgpack_object_array array;
+    int index;
+    int column;
+    int nsignals, naliases;
+    status = recon_wall_table_find_row_index(tab, n, &index);
+    if (status != RECON_OK) {
+        // Could not find requested row index
+        return status;
+    }
+    status = recon_wall_row_buffer_get_object(file->rows, index, &object);
+    if (status != RECON_OK) {
+        // Failed to get row data
+        return status;
+    }
+    // Get expected length of row
+    status = recon_wall_table_n_signals(tab, &nsignals, &naliases);
+    if (status != RECON_OK) {
+        // Failed to fetch number of signals from table header
+        return status;
+    }
+    switch (object->type) {
+        case MSGPACK_OBJECT_MAP:
+            map = object->via.map;
+            if (memcmp(table->name, map.ptr->key.via.raw.ptr, map.ptr->key.via.raw.size) == 0) {
+                switch (map.ptr->val.type) {
+                    case MSGPACK_OBJECT_ARRAY:
+                        array = map.ptr->val.via.array;
+                        // Check length of row is that given in table header
+                        if (nsignals != array.size) {
+                            return RECON_INCOMPLETE_ROW;
+                        }
+                        for (column = 0; column < nsignals; column++) {
+                            switch (array.ptr[column].type) {
+                                case MSGPACK_OBJECT_DOUBLE:
+                                    out[column] = array.ptr[column].via.dec;
+                                    break;
+                                case MSGPACK_OBJECT_POSITIVE_INTEGER:
+                                    out[column] = 1.0 * array.ptr[column].via.u64;
+                                    break;
+                                case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+                                    out[column] = 1.0 * array.ptr[column].via.i64;
+                                    break;
+                                case MSGPACK_OBJECT_BOOLEAN:
+                                    out[column] = array.ptr[column].via.boolean ? 1.0 : 0.0;
+                                    break;
+                                default:
+                                    out[column] = 0.0;
+                            }
+                            // No need to apply transform - these are the unaliased signals
+                        }
+                }
+            } else {
+                // Row doesn't correspond to expected table
+                return RECON_NOT_FOUND;
+            }
+        default:
+            // Row doesn't contain data?
+            return RECON_NOT_FOUND;
+    }
+    return RECON_OK;
+}
+
+// Get nth row of table as array of ints
+recon_status recon_wall_table_get_row_integer(recon_wall_table tab, int n, int *out) {
+    recon_status status = RECON_OK;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    msgpack_object *object;
+    msgpack_object_map map;
+    msgpack_object_array array;
+    int index;
+    int column;
+    int nsignals, naliases;
+    status = recon_wall_table_find_row_index(tab, n, &index);
+    if (status != RECON_OK) {
+        // Could not find requested row index
+        return status;
+    }
+    status = recon_wall_row_buffer_get_object(file->rows, index, &object);
+    if (status != RECON_OK) {
+        // Failed to get row data
+        return status;
+    }
+    // Get expected length of row
+    status = recon_wall_table_n_signals(tab, &nsignals, &naliases);
+    if (status != RECON_OK) {
+        // Failed to fetch number of signals from table header
+        return status;
+    }
+    switch (object->type) {
+        case MSGPACK_OBJECT_MAP:
+            map = object->via.map;
+            if (memcmp(table->name, map.ptr->key.via.raw.ptr, map.ptr->key.via.raw.size) == 0) {
+                switch (map.ptr->val.type) {
+                    case MSGPACK_OBJECT_ARRAY:
+                        array = map.ptr->val.via.array;
+                        // Check length of row is that given in table header
+                        if (nsignals != array.size) {
+                            return RECON_INCOMPLETE_ROW;
+                        }
+                        for (column = 0; column < nsignals; column++) {
+                            switch (array.ptr[column].type) {
+                                case MSGPACK_OBJECT_POSITIVE_INTEGER:
+                                    out[column] = (int) array.ptr[column].via.u64;
+                                    break;
+                                case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+                                    out[column] = (int) array.ptr[column].via.i64;
+                                    break;
+                                case MSGPACK_OBJECT_BOOLEAN:
+                                    out[column] = array.ptr[column].via.boolean ? 1 : 0;
+                                    break;
+                                default:
+                                    out[column] = 0;
+                            }
+                            // No need to apply transform - these are the unaliased signals
+                        }
+                }
+            } else {
+                // Row doesn't correspond to expected table
+                return RECON_NOT_FOUND;
+            }
+        default:
+            // Row doesn't contain data?
+            return RECON_NOT_FOUND;
+    }
+    return RECON_OK;
+}
+
+
+// Get nth row of table as array of booleans
+recon_status recon_wall_table_get_row_boolean(recon_wall_table tab, int n, recon_booleantype *out) {
+    recon_status status = RECON_OK;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    msgpack_object *object;
+    msgpack_object_map map;
+    msgpack_object_array array;
+    int index;
+    int column;
+    int nsignals, naliases;
+    status = recon_wall_table_find_row_index(tab, n, &index);
+    if (status != RECON_OK) {
+        // Could not find requested row index
+        return status;
+    }
+    status = recon_wall_row_buffer_get_object(file->rows, index, &object);
+    if (status != RECON_OK) {
+        // Failed to get row data
+        return status;
+    }
+    // Get expected length of row
+    status = recon_wall_table_n_signals(tab, &nsignals, &naliases);
+    if (status != RECON_OK) {
+        // Failed to fetch number of signals from table header
+        return status;
+    }
+    switch (object->type) {
+        case MSGPACK_OBJECT_MAP:
+            map = object->via.map;
+            if (memcmp(table->name, map.ptr->key.via.raw.ptr, map.ptr->key.via.raw.size) == 0) {
+                switch (map.ptr->val.type) {
+                    case MSGPACK_OBJECT_ARRAY:
+                        array = map.ptr->val.via.array;
+                        // Check length of row is that given in table header
+                        if (nsignals != array.size) {
+                            return RECON_INCOMPLETE_ROW;
+                        }
+                        for (column = 0; column < nsignals; column++) {
+                            switch (array.ptr[column].type) {
+                                case MSGPACK_OBJECT_POSITIVE_INTEGER:
+                                    if (array.ptr[column].via.u64 > 0) {
+                                        out[column] = RECON_TRUE;
+                                    } else {
+                                        out[column] = RECON_FALSE;
+                                    }
+                                    break;
+                                case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+                                    out[column] = RECON_FALSE;
+                                    break;
+                                case MSGPACK_OBJECT_BOOLEAN:
+                                    if (array.ptr[column].via.boolean) {
+                                        out[column] = RECON_TRUE;
+                                    } else {
+                                        out[column] = RECON_FALSE;
+                                    }
+                                    break;
+                                default:
+                                    out[column] = RECON_FALSE;
+                            }
+                            // No need to apply transform - these are the unaliased signals
+                        }
+                }
+            } else {
+                // Row doesn't correspond to expected table
+                return RECON_NOT_FOUND;
+            }
+        default:
+            // Row doesn't contain data?
+            return RECON_NOT_FOUND;
+    }
+    return RECON_OK;
+}
+
+// Get nth row of table as array of msgpack_objects
+recon_status recon_wall_table_get_row_object(recon_wall_table tab, int n, msgpack_object* out) {
+    recon_status status = RECON_OK;
+    wall_table* table = (wall_table*) tab;
+    wall_file* file = (wall_file*) table->wall;
+    msgpack_object *object;
+    msgpack_object_map map;
+    msgpack_object_array array;
+    int index;
+    int column;
+    int nsignals, naliases;
+    status = recon_wall_table_find_row_index(tab, n, &index);
+    if (status != RECON_OK) {
+        // Could not find requested row index
+        return status;
+    }
+    status = recon_wall_row_buffer_get_object(file->rows, index, &object);
+    if (status != RECON_OK) {
+        // Failed to get row data
+        return status;
+    }
+    // Get expected length of row
+    status = recon_wall_table_n_signals(tab, &nsignals, &naliases);
+    if (status != RECON_OK) {
+        // Failed to fetch number of signals from table header
+        return status;
+    }
+    switch (object->type) {
+        case MSGPACK_OBJECT_MAP:
+            map = object->via.map;
+            if (memcmp(table->name, map.ptr->key.via.raw.ptr, map.ptr->key.via.raw.size) == 0) {
+                switch (map.ptr->val.type) {
+                    case MSGPACK_OBJECT_ARRAY:
+                        array = map.ptr->val.via.array;
+                        // Check length of row is that given in table header
+                        if (nsignals != array.size) {
+                            return RECON_INCOMPLETE_ROW;
+                        }
+                        for (column = 0; column < nsignals; column++) {
+                            out[column] = array.ptr[column];
+                            // No need to apply transform - these are the unaliased signals
+                        }
+                }
+            } else {
+                // Row doesn't correspond to expected table
+                return RECON_NOT_FOUND;
+            }
+        default:
+            // Row doesn't contain data?
+            return RECON_NOT_FOUND;
+    }
     return RECON_OK;
 }
 
