@@ -13,7 +13,7 @@ recon_status recon_wall_open(const char *filename, recon_wall* out) {
     if (fp == NULL) {
         return RECON_READ_ERROR;
     }
-    *out = (recon_wall*) malloc(sizeof (wall_file));
+    *out = (recon_wall) malloc(sizeof (wall_file));
     wall = (wall_file*) * out;
     wall->fp = fp;
     rewind(wall->fp);
@@ -59,7 +59,7 @@ recon_status recon_wall_open(const char *filename, recon_wall* out) {
     free(header);
     free(header_size);
     free(header_data);
-    wall->currentrowtable = NULL;
+    wall->currentrowtable = -1;
     wall->finalized = RECON_TRUE;
     return status;
 }
@@ -146,7 +146,10 @@ recon_status recon_wall_visit_table(wall_file* wall, char* name, uint32_t namesi
     if (status != RECON_OK) {
         return status;
     }
-
+    /*status = recon_wall_table_visit_vmeta(table, vmetamap, vmetamap.size);
+    if (status != RECON_OK) {
+        return status;
+    }*/
     free(tablename);
 
     return status;
@@ -266,7 +269,7 @@ recon_status recon_wall_visit_table_elements(msgpack_object_map map, msgpack_obj
 recon_status recon_wall_create(char* filename, int nTables, int nObjects, recon_wall* out) {
     FILE* fp;
     wall_file* wall;
-    *out = (recon_wall*) malloc(sizeof (wall_file));
+    *out = (recon_wall) malloc(sizeof (wall_file));
     fp = fopen(filename, "w");
     wall = (wall_file*) * out;
     wall->fp = fp;
@@ -285,7 +288,7 @@ recon_status recon_wall_create(char* filename, int nTables, int nObjects, recon_
     wall->buffer = msgpack_sbuffer_new();
     wall->packer = msgpack_packer_new(wall->buffer, msgpack_sbuffer_write);
     wall->finalized = RECON_FALSE;
-    wall->currentrowtable = NULL;
+    wall->currentrowtable = -1;
     wall->currentfield = NULL;
     return RECON_OK;
 }
