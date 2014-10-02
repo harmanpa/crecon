@@ -112,6 +112,7 @@ recon_status recon_wall_table_end_row(recon_wall_table tab) {
     file->currentrowtable = -1;
     file->currentrowtablesize = 0;
     file->currentrowwritten = 0;
+    free(bytes);
     return RECON_OK;
 }
 

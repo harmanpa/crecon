@@ -28,8 +28,6 @@ recon_status test1_write_mobj_field(recon_wall_object object) {
     recon_status status = RECON_OK;
     int no_array_elements = 3, i = 0;
     char buffer_string[BUFFER_STRING_LENGTH];
-    char field_name[BUFFER_STRING_LENGTH];
-    char *tofree;
     comp_object myobj;
     recon_wall_object_mobj msgobj;
     msgpack_packer *packer;
@@ -37,14 +35,14 @@ recon_status test1_write_mobj_field(recon_wall_object object) {
 
     // Assemble the user object
     myobj.str_a = (char*) malloc(strlen("string_a") + 1);
-    myobj.str_a = "string_a";
+    strcpy(myobj.str_a, "string_a");
     myobj.str_b = (char*) malloc(strlen("string_b") + 1);
-    myobj.str_b = "string_b";
+    strcpy(myobj.str_b, "string_b");
     myobj.str_array = (char**) malloc(no_array_elements * sizeof (char*));
     for (i = 0; i < no_array_elements; i++) {
         sprintf(buffer_string, "string_array_elem%i", i);
         myobj.str_array[i] = (char*) malloc(strlen(buffer_string) + 1);
-        memcpy(myobj.str_array[i], buffer_string, strlen(buffer_string) + 1);
+        strcpy(myobj.str_array[i], buffer_string);
     }
     // Prepare recon_wall_object_mobj object to help construction
     status = recon_wall_object_new_mobj(&msgobj);
@@ -97,12 +95,12 @@ recon_status test1_write_mobj_field(recon_wall_object object) {
         return status;
     }
     status = recon_wall_end_field_entry(object);
-    /*free(myobj.str_a);
+    free(myobj.str_a);
     free(myobj.str_b);
     for (i = 0; i < no_array_elements; i++) {
         free(myobj.str_array[i]);
     }
-    free(myobj.str_array);*/
+    free(myobj.str_array);
     return status;
 }
 
@@ -145,7 +143,7 @@ recon_status test1_read_myobj(recon_wall_object object) {
             if (status != RECON_OK) {
                 return status;
             }
-            status =  recon_wall_object_extract_field_value_element(elem, &fieldname, &fieldarray, &len_array);
+            status = recon_wall_object_extract_field_value_element(elem, &fieldname, &fieldarray, &len_array);
             if (status != RECON_OK) {
                 return status;
             }
