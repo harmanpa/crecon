@@ -28,21 +28,21 @@ extern "C" {
 	typedef struct {
 		recon_wall wall;
 		char* name;
-		int nsignals;
-		int ndefinedsignals;
-		int naliases;
-		int ndefinedaliases;
+		size_t nsignals;
+		size_t ndefinedsignals;
+		size_t naliases;
+		size_t ndefinedaliases;
 		char** signals;
 		char** aliases;
 		char** aliased;
 		char** transforms;
-		int nrows;
+		size_t nrows;
 	} wall_table;
         
         typedef struct {
             char *name;
             char **values;
-            int novalues;
+            size_t novalues;
         } wall_field_element;
 
 	typedef struct {
@@ -58,7 +58,7 @@ extern "C" {
 		void* field;
 		recon_booleantype fieldischar;
                 wall_field_element* elements;
-                int nelements;
+                size_t nelements;
 	} wall_field;
 
 	typedef struct {
@@ -66,10 +66,10 @@ extern "C" {
 		char* name;
 		wall_field* fields;
 		wall_field* bufferedfields;
-		int sizefields;
-		int sizebufferedfields;
-		int ndefinedfields;
-		int nbufferedfields;
+		size_t sizefields;
+		size_t sizebufferedfields;
+		size_t ndefinedfields;
+		size_t nbufferedfields;
 		void *objmeta;
 	} wall_object;
 
@@ -79,25 +79,25 @@ extern "C" {
 		int byteswritten;
 		int nfmeta;
 		//wall_fmeta *fmeta;
-		int ntables;
-		int ndefinedtables;
+		size_t ntables;
+		size_t ndefinedtables;
 		wall_table* tables;
-		int nobjects;
-		int ndefinedobjects;
+		size_t nobjects;
+		size_t ndefinedobjects;
 		wall_object *objects;
 		// Serialization
 		msgpack_sbuffer* buffer;
 		msgpack_packer* packer;
 		// Row writing variables
 		wall_table* currentrowtable;
-		int currentrowtablesize;
-		int currentrowwritten;
+		size_t currentrowtablesize;
+		size_t currentrowwritten;
 		size_t positionatrowstart;
 		//Field writing variables
 		wall_object* currentfield;
 		size_t positionatfieldstart;
 		// Row reading
-		int nrows;
+		size_t nrows;
 		recon_wall_row_buffer* rows;
 	} wall_file;
 

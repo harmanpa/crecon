@@ -62,6 +62,7 @@ recon_status recon_wall_open(const char *filename, recon_wall* out) {
     free(header_size);
     free(header_data);
     wall->currentrowtable = -1;
+    wall->currentfield = NULL;
     wall->finalized = RECON_TRUE;
     return status;
 }
@@ -444,6 +445,9 @@ recon_status recon_wall_flush(recon_wall wall) {
     }
     size = file->buffer->size;
     if (size > 0) {
+        if (0 != fseek(file->fp, 0, SEEK_SET) || ferror(file->fp)) {
+            return RECON_WRITE_ERROR;
+        }
         if (size == fwrite(file->buffer->data, 1, size, file->fp)) {
             msgpack_sbuffer_clear(file->buffer);
         } else {
@@ -456,6 +460,7 @@ recon_status recon_wall_flush(recon_wall wall) {
 
 recon_status recon_wall_unpack_fixed_header(wall_file* file, uint32_t* out) {
     unsigned char* header = (unsigned char*) malloc(18);
+    rewind(file->fp);
     if (18 != fread(header, 1, 18, file->fp)) {
         free(header);
         header = NULL;
@@ -511,6 +516,7 @@ recon_status recon_wall_visit_rows(wall_file* file) {
             row_data = NULL;
             return RECON_READ_ERROR;
         }
+        rewind(file->fp);
         status = recon_wall_row_buffer_append(file->rows, row_data, n);
         if (status != RECON_OK) {
             free(sizeindicator);
@@ -520,8 +526,8 @@ recon_status recon_wall_visit_rows(wall_file* file) {
             return status;
         }
         file->nrows++;
-    fprintf(stderr,"Read row %i\n", file->nrows);
     }
+    rewind(file->fp);
     free(row_data);
     free(sizeindicator);
     sizeindicator = NULL;
