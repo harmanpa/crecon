@@ -487,8 +487,8 @@ recon_status recon_wall_pack_fixed_header(wall_file* file, uint32_t header_size)
         header = NULL;
         return RECON_OK;
     }
-    header = NULL;
     free(header);
+    header = NULL;
     return RECON_WRITE_ERROR;
 }
 
